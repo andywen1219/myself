@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据报告</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            background-color: #f5f5f5;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .status-bar {
+            background-color: #000;
+            color: white;
+            padding: 12px 16px;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            height: 59px;
+            box-sizing: border-box;
+        }
+        .status-bar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 59px;
+            background: #000;
+            z-index: -1;
+        }
+        .header {
+            background: white;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            position: sticky;
+            top: 59px;
+            left: 0;
+            right: 0;
+            z-index: 999;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .back-btn {
+            color: #333;
+            font-size: 16px;
+            padding: 8px;
+            margin-left: -8px;
+        }
+        .header-title {
+            flex: 1;
+            text-align: center;
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+        .card-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 16px;
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-bottom: 16px;
+        }
+        .user-level-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .user-level-table th,
+        .user-level-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .user-level-table th {
+            font-size: 13px;
+            color: #666;
+            font-weight: 500;
+        }
+        .user-level-table td {
+            font-size: 14px;
+            color: #333;
+        }
+        .user-level-table tr:last-child td {
+            border-bottom: none;
+        }
+        .level-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .level-a { background: #f3e8fd; color: #653eb3; }
+        .level-b { background: #e0f2fe; color: #0284c7; }
+        .level-c { background: #fef3c7; color: #ca8a04; }
+        .level-d { background: #fee2e2; color: #dc2626; }
+        .level-e { background: #f3f4f6; color: #4b5563; }
+        .last-payment {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 16px;
+        }
+        .last-payment-title {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+        .last-payment-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .payment-date {
+            font-size: 14px;
+            color: #333;
+        }
+        .payment-amount {
+            font-size: 16px;
+            font-weight: 600;
+            color: #653eb3;
+        }
+    </style>
+</head>
+<body>
+    <!-- 状态栏 -->
+    <div class="status-bar">
+        <div>9:41</div>
+        <div class="flex items-center space-x-2">
+            <i class="fas fa-signal"></i>
+            <i class="fas fa-wifi"></i>
+            <i class="fas fa-battery-full"></i>
+        </div>
+    </div>
+
+    <!-- 标题栏 -->
+    <div class="header">
+        <a href="home.html" class="back-btn">
+            <i class="fas fa-chevron-left"></i>
+        </a>
+        <div class="header-title">数据报告</div>
+    </div>
+
+    <!-- 主内容区域 -->
+    <div class="px-4 pb-24">
+        <!-- 贷款信息 -->
+        <div class="card">
+            <div class="card-title">贷款信息</div>
+            <div class="chart-container">
+                <canvas id="loanChart"></canvas>
+            </div>
+        </div>
+
+        <!-- 贷款余额 -->
+        <div class="card">
+            <div class="card-title">贷款余额</div>
+            <div class="chart-container">
+                <canvas id="balanceChart"></canvas>
+            </div>
+        </div>
+
+        <!-- 贷款网点分布 -->
+        <div class="card">
+            <div class="card-title">贷款网点分布</div>
+            <div class="chart-container">
+                <canvas id="distributionChart"></canvas>
+            </div>
+            <table class="user-level-table">
+                <thead>
+                    <tr>
+                        <th>用户级别</th>
+                        <th>用户数量</th>
+                        <th>占比</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="level-badge level-a">A级</span></td>
+                        <td>2,345</td>
+                        <td>35%</td>
+                    </tr>
+                    <tr>
+                        <td><span class="level-badge level-b">B级</span></td>
+                        <td>1,890</td>
+                        <td>28%</td>
+                    </tr>
+                    <tr>
+                        <td><span class="level-badge level-c">C级</span></td>
+                        <td>1,234</td>
+                        <td>18%</td>
+                    </tr>
+                    <tr>
+                        <td><span class="level-badge level-d">D级</span></td>
+                        <td>890</td>
+                        <td>13%</td>
+                    </tr>
+                    <tr>
+                        <td><span class="level-badge level-e">E级</span></td>
+                        <td>345</td>
+                        <td>6%</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 还款瀑布 -->
+        <div class="card">
+            <div class="card-title">还款瀑布</div>
+            <div class="chart-container">
+                <canvas id="waterfallChart"></canvas>
+            </div>
+            <div class="last-payment">
+                <div class="last-payment-title">下一次还款</div>
+                <div class="last-payment-info">
+                    <div class="payment-date">2024-03-15</div>
+                    <div class="payment-amount">¥25,000</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 生成随机数据
+        function generateRandomData(count, min, max) {
+            return Array.from({length: count}, () => 
+                Math.floor(Math.random() * (max - min + 1)) + min
+            );
+        }
+
+        // 生成月份标签
+        function generateMonthLabels(count) {
+            const months = ['1月', '2月', '3月', '4月', '5月', '6月', 
+                          '7月', '8月', '9月', '10月', '11月', '12月'];
+            return months.slice(-count);
+        }
+
+        // 贷款信息图表
+        const loanCtx = document.getElementById('loanChart').getContext('2d');
+        new Chart(loanCtx, {
+            type: 'bar',
+            data: {
+                labels: generateMonthLabels(12),
+                datasets: [{
+                    label: '新增贷款金额',
+                    data: generateRandomData(12, 1000000, 5000000),
+                    backgroundColor: '#653eb3',
+                    borderRadius: 4
+                }, {
+                    label: '累计贷款金额',
+                    data: generateRandomData(12, 5000000, 20000000),
+                    backgroundColor: '#9e70fa',
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return '¥' + (value / 10000).toFixed(1) + '万';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // 贷款余额图表
+        const balanceCtx = document.getElementById('balanceChart').getContext('2d');
+        new Chart(balanceCtx, {
+            type: 'bar',
+            data: {
+                labels: generateMonthLabels(12),
+                datasets: [{
+                    label: '新增贷款余额',
+                    data: generateRandomData(12, 800000, 3000000),
+                    backgroundColor: '#2563eb',
+                    borderRadius: 4
+                }, {
+                    label: '累计贷款余额',
+                    data: generateRandomData(12, 3000000, 15000000),
+                    backgroundColor: '#60a5fa',
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return '¥' + (value / 10000).toFixed(1) + '万';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // 网点分布图表
+        const distributionCtx = document.getElementById('distributionChart').getContext('2d');
+        new Chart(distributionCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['华东', '华北', '华南', '西南', '东北', '西北'],
+                datasets: [{
+                    data: [35, 25, 20, 10, 7, 3],
+                    backgroundColor: [
+                        '#653eb3',
+                        '#2563eb',
+                        '#16a34a',
+                        '#ca8a04',
+                        '#dc2626',
+                        '#4b5563'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right'
+                    }
+                },
+                onClick: function(event, elements) {
+                    if (elements.length > 0) {
+                        window.location.href = 'customer-list.html';
+                    }
+                }
+            }
+        });
+
+        // 还款瀑布图表
+        const waterfallCtx = document.getElementById('waterfallChart').getContext('2d');
+        new Chart(waterfallCtx, {
+            type: 'bar',
+            data: {
+                labels: generateMonthLabels(12),
+                datasets: [{
+                    label: '还款金额',
+                    data: generateRandomData(12, 150000, 350000),
+                    backgroundColor: '#16a34a',
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return '¥' + (value / 1000).toFixed(1) + '千';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html> 

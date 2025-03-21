@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人中心</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            background-color: #f5f5f5;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .status-bar {
+            background-color: #000;
+            color: white;
+            padding: 12px 16px;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            height: 59px;
+            box-sizing: border-box;
+        }
+        .status-bar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 59px;
+            background: #000;
+            z-index: -1;
+        }
+        .user-info {
+            background: white;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+        .user-header {
+            display: flex;
+            align-items: center;
+        }
+        .user-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            margin-right: 12px;
+            border: 2px solid #f0f0f0;
+        }
+        .user-detail {
+            flex: 1;
+        }
+        .user-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 2px;
+        }
+        .user-phone {
+            font-size: 13px;
+            color: #666;
+            display: flex;
+            align-items: center;
+            margin-bottom: 4px;
+            position: relative;
+        }
+        .user-phone i {
+            position: absolute;
+            right: 0;
+            color: #653eb3;
+            font-size: 12px;
+        }
+        .user-tags {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .user-level {
+            display: inline-block;
+            background: #f3e8fd;
+            color: #653eb3;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+        }
+        .user-role {
+            display: inline-block;
+            background: #f5f5f5;
+            color: #666;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+        }
+        .loan-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+        .loan-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .loan-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+        .loan-status {
+            font-size: 14px;
+            color: #16a34a;
+            background: #dcfce7;
+            padding: 4px 12px;
+            border-radius: 16px;
+        }
+        .loan-progress {
+            background: #f8f9fa;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+        }
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+        .progress-label {
+            font-size: 14px;
+            color: #666;
+            font-weight: 500;
+        }
+        .progress-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #653eb3;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #FFFFFF, #9370fa, #653eb3);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+        .progress-details {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+        }
+        .progress-amount {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .amount-label {
+            color: #666;
+        }
+        .amount-value {
+            color: #333;
+            font-weight: 500;
+        }
+        .service-grid {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+        .service-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+        }
+        .service-icon {
+            width: 24px;
+            height: 24px;
+            margin-bottom: 8px;
+            transition: all 0.2s ease;
+        }
+        .service-icon img {
+            width: 24px;
+            height: 24px;
+            transition: all 0.2s ease;
+        }
+        .service-item:hover .service-icon img {
+            filter: brightness(0) saturate(100%) invert(31%) sepia(98%) saturate(1234%) hue-rotate(234deg) brightness(89%) contrast(101%);
+        }
+        .service-text {
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+        .service-item:hover .service-text {
+            color: #653eb3;
+        }
+        .bottom-nav {
+            height: 83px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+        .safe-area-bottom {
+            height: 34px;
+            background: #fff;
+        }
+        .loan-detail-btn {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            padding: 12px 0;
+            background: transparent;
+            border: none;
+            color: #653eb3;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-top: 1px solid #f0f0f0;
+            margin-top: 12px;
+        }
+        .loan-detail-btn:hover {
+            background: #f8f9fa;
+        }
+        .loan-detail-btn i {
+            font-size: 12px;
+            transition: transform 0.2s ease;
+        }
+        .loan-detail-btn:hover i {
+            transform: translateX(4px);
+        }
+    </style>
+</head>
+<body class="relative">
+    <!-- 状态栏 -->
+    <div class="status-bar">
+        <div>9:41</div>
+        <div class="flex items-center space-x-2">
+            <i class="fas fa-signal"></i>
+            <i class="fas fa-wifi"></i>
+            <i class="fas fa-battery-full"></i>
+        </div>
+    </div>
+
+    <!-- 主内容区域 -->
+    <div class="px-4 pb-24">
+        <!-- 用户信息 -->
+        <div class="user-info">
+            <div class="user-header">
+                <img src="images/avatar.jpg" alt="用户头像" class="user-avatar">
+                <div class="user-detail">
+                    <div class="user-name">张先生</div>
+                    <div class="user-phone">
+                        138****8888
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                    <div class="user-tags">
+                        <div class="user-level">A级</div>
+                        <div class="user-role">个人/企业法人</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 我的贷款 -->
+        <div class="loan-card">
+            <div class="loan-header">
+                <div class="loan-title">我的贷款</div>
+                <div class="loan-status">正常还款中</div>
+            </div>
+            <div class="loan-progress">
+                <div class="progress-header">
+                    <div class="progress-label">还款进度</div>
+                    <div class="progress-value">已还 40%</div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-bar-fill" style="width: 40%"></div>
+                </div>
+                <div class="progress-details">
+                    <div class="progress-amount">
+                        <div class="amount-label">已还总金额</div>
+                        <div class="amount-value">¥200,000</div>
+                    </div>
+                    <div class="progress-amount">
+                        <div class="amount-label">未还总金额</div>
+                        <div class="amount-value">¥300,000</div>
+                    </div>
+                </div>
+            </div>
+            <a href="my-loans.html" class="loan-detail-btn">
+                查看详情
+                <i class="fas fa-chevron-right"></i>
+            </a>
+        </div>
+
+        <!-- 我的服务 -->
+        <div class="service-grid">
+            <div class="service-item">
+                <div class="service-icon">
+                    <img src="images/切换身份.svg" alt="切换身份" class="w-5 h-5">
+                </div>
+                <div class="service-text">切换身份</div>
+            </div>
+            <div class="service-item">
+                <div class="service-icon">
+                    <img src="images/我的企业.svg" alt="我的企业" class="w-5 h-5">
+                </div>
+                <div class="service-text">我的企业</div>
+            </div>
+            <div class="service-item">
+                <div class="service-icon">
+                    <img src="images/经办人.svg" alt="经办人" class="w-5 h-5">
+                </div>
+                <div class="service-text">经办人</div>
+            </div>
+            <div class="service-item">
+                <div class="service-icon">
+                    <img src="images/银行卡.svg" alt="银行卡" class="w-5 h-5">
+                </div>
+                <div class="service-text">银行卡</div>
+            </div>
+            <div class="service-item">
+                <div class="service-icon">
+                    <img src="images/补充资料.svg" alt="补充资料" class="w-5 h-5">
+                </div>
+                <div class="service-text">补充资料</div>
+            </div>
+            <div class="service-item">
+                <div class="service-icon">
+                    <img src="images/隐私政策.svg" alt="隐私政策" class="w-5 h-5">
+                </div>
+                <div class="service-text">隐私政策</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部导航栏 -->
+    <div class="bottom-nav">
+        <div class="grid grid-cols-4">
+            <div class="flex flex-col items-center py-2">
+                <a href="home.html" class="flex flex-col items-center">
+                    <img src="images/1-1.svg" alt="首页" class="w-6 h-6 mb-1">
+                    <span class="text-xs text-gray-500">首页</span>
+                </a>
+            </div>
+            <div class="flex flex-col items-center py-2">
+                <a href="todo.html" class="flex flex-col items-center">
+                    <img src="images/2-2.svg" alt="待办" class="w-6 h-6 mb-1">
+                    <span class="text-xs text-[#653eb3]">待办</span>
+                </a>
+            </div>
+            <div class="flex flex-col items-center py-2">
+                <a href="service.html" class="flex flex-col items-center">
+                    <img src="images/3-1.svg" alt="客服" class="w-6 h-6 mb-1">
+                    <span class="text-xs text-gray-500">客服</span>
+                </a>
+            </div>
+            <div class="flex flex-col items-center py-2">
+                <img src="images/4-2.svg" alt="我的" class="w-6 h-6 mb-1">
+                <span class="text-xs text-[#653eb3]">我的</span>
+            </div>
+        </div>
+        <div class="safe-area-bottom"></div>
+    </div>
+</body>
+</html> 

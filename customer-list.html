@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>客户列表</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body {
+            width: 100%;
+            height: 100vh;
+            margin: 0;
+            background-color: #f5f5f5;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .status-bar {
+            background-color: #000;
+            color: white;
+            padding: 12px 16px;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            height: 59px;
+            box-sizing: border-box;
+        }
+        .status-bar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 59px;
+            background: #000;
+            z-index: -1;
+        }
+        .header {
+            background: white;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            position: sticky;
+            top: 59px;
+            left: 0;
+            right: 0;
+            z-index: 999;
+            border-bottom: 1px solid #f0f0f0;
+            justify-content: center;
+        }
+        .back-btn {
+            color: #333;
+            font-size: 16px;
+            padding: 8px;
+            margin-left: -8px;
+            position: absolute;
+            left: 16px;
+        }
+        .header-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+        .filter-section {
+            background: white;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+        .search-box {
+            position: relative;
+            margin-bottom: 12px;
+        }
+        .search-input {
+            width: 100%;
+            padding: 8px 12px 8px 36px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            background-color: #f9fafb;
+        }
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+        }
+        .filter-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .filter-item {
+            flex: 1;
+        }
+        .filter-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            background-color: #f9fafb;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 8.825L1.175 4 2.238 2.938 6 6.7l3.763-3.763L10.825 4z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 32px;
+        }
+        input[type="date"].filter-input {
+            background-image: none;
+            padding-right: 12px;
+        }
+        .query-btn {
+            width: 100%;
+            padding: 8px;
+            background: linear-gradient(90deg, #653eb3, #9370fa);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .table-container {
+            background: white;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .customer-table {
+            width: 100%;
+            min-width: 800px;
+            border-collapse: collapse;
+        }
+        .customer-table th,
+        .customer-table td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
+        }
+        .customer-table th {
+            background-color: #f9fafb;
+            color: #666;
+            font-weight: 500;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+        .customer-table td {
+            color: #333;
+        }
+        .customer-table tr:last-child td {
+            border-bottom: none;
+        }
+        .amount {
+            color: #653eb3;
+            font-weight: 500;
+        }
+        .remaining {
+            color: #16a34a;
+        }
+        .customer-table tr:not(:first-child):hover {
+            background-color: #f8f9fa;
+            transition: background-color 0.2s ease;
+        }
+    </style>
+</head>
+<body>
+    <!-- 状态栏 -->
+    <div class="status-bar">
+        <div>9:41</div>
+        <div class="flex items-center space-x-2">
+            <i class="fas fa-signal"></i>
+            <i class="fas fa-wifi"></i>
+            <i class="fas fa-battery-full"></i>
+        </div>
+    </div>
+
+    <!-- 标题栏 -->
+    <div class="header">
+        <a href="#" class="back-btn" onclick="handleBack(event)">
+            <i class="fas fa-chevron-left"></i>
+        </a>
+        <div class="header-title">客户列表</div>
+    </div>
+
+    <!-- 筛选项 -->
+    <div class="filter-section">
+        <div class="search-box">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" class="search-input" placeholder="搜索网点名称/企业名称">
+        </div>
+        <div class="filter-row">
+            <div class="filter-item">
+                <select class="filter-input">
+                    <option value="">选择区域</option>
+                    <option value="shanghai">上海区</option>
+                    <option value="zhejiang_south">浙南省区</option>
+                    <option value="zhejiang_north">浙北省区</option>
+                    <option value="jiangsu">江苏省区</option>
+                </select>
+            </div>
+            <div class="filter-item">
+                <input type="date" class="filter-input" value="2024-03-15">
+            </div>
+        </div>
+        <button class="query-btn">查询</button>
+    </div>
+
+    <!-- 客户列表 -->
+    <div class="table-container">
+        <table class="customer-table">
+            <thead>
+                <tr>
+                    <th>网点编号</th>
+                    <th>借款金额</th>
+                    <th>网点名称</th>
+                    <th>企业名称</th>
+                    <th>总额度</th>
+                    <th>剩余额度</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr onclick="window.location.href='customer-detail.html'" style="cursor: pointer">
+                    <td>552001</td>
+                    <td class="amount">¥500,000</td>
+                    <td>安徽省新淮北市</td>
+                    <td>天津上东货运代理有限公司</td>
+                    <td class="amount">¥1,000,000</td>
+                    <td class="remaining">¥500,000</td>
+                </tr>
+                <tr onclick="window.location.href='customer-detail.html'" style="cursor: pointer">
+                    <td>552002</td>
+                    <td class="amount">¥300,000</td>
+                    <td>安徽省宿州市砀山县</td>
+                    <td>佛山成涛物流有限公司</td>
+                    <td class="amount">¥800,000</td>
+                    <td class="remaining">¥500,000</td>
+                </tr>
+                <tr onclick="window.location.href='customer-detail.html'" style="cursor: pointer">
+                    <td>552003</td>
+                    <td class="amount">¥200,000</td>
+                    <td>安徽省蚌埠市</td>
+                    <td>上海顶浪货运代理有限公司</td>
+                    <td class="amount">¥600,000</td>
+                    <td class="remaining">¥400,000</td>
+                </tr>
+                <tr onclick="window.location.href='customer-detail.html'" style="cursor: pointer">
+                    <td>552004</td>
+                    <td class="amount">¥400,000</td>
+                    <td>安徽省合肥市瑶海区御景湾</td>
+                    <td>南宁市松圆商贸有限公司</td>
+                    <td class="amount">¥1,200,000</td>
+                    <td class="remaining">¥800,000</td>
+                </tr>
+                <tr onclick="window.location.href='customer-detail.html'" style="cursor: pointer">
+                    <td>552005</td>
+                    <td class="amount">¥250,000</td>
+                    <td>安徽省蚌埠市蚌山区</td>
+                    <td>西安常兴速递服务有限公司</td>
+                    <td class="amount">¥700,000</td>
+                    <td class="remaining">¥450,000</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        function handleBack(event) {
+            event.preventDefault();
+            const urlParams = new URLSearchParams(window.location.search);
+            const fromPage = urlParams.get('from');
+            
+            // 如果是从客户详情页面进入，则固定返回到数据报告页面
+            if (fromPage === 'customer-detail') {
+                window.location.href = 'report.html';
+            } else {
+                window.location.href = 'report.html';
+            }
+        }
+    </script>
+</body>
+</html> 

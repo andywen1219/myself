@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>在线客服</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            background-color: #f5f5f5;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .status-bar {
+            background-color: #000;
+            color: white;
+            padding: 12px 16px;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            height: 59px;
+            box-sizing: border-box;
+        }
+        .status-bar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 59px;
+            background: #000;
+            z-index: -1;
+        }
+        .chat-container {
+            padding: 16px;
+            padding-bottom: 220px;
+        }
+        .message {
+            margin-bottom: 16px;
+            display: flex;
+            flex-direction: column;
+        }
+        .message.user {
+            align-items: flex-end;
+        }
+        .message-avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            margin-right: 8px;
+            flex-shrink: 0;
+        }
+        .message.user .message-avatar {
+            margin-right: 0;
+            margin-left: 8px;
+        }
+        .message-wrapper {
+            display: flex;
+            align-items: flex-start;
+            max-width: 85%;
+        }
+        .message.user .message-wrapper {
+            flex-direction: row-reverse;
+            margin-left: auto;
+        }
+        .message.service .message-wrapper {
+            margin-right: auto;
+        }
+        .message-content {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 16px;
+            font-size: 14px;
+            line-height: 1.5;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            position: relative;
+        }
+        .message.user .message-content {
+            background: #653eb3;
+            color: white;
+            border-bottom-right-radius: 4px;
+            margin-right: 4px;
+        }
+        .message.service .message-content {
+            background: white;
+            color: #333;
+            border-bottom-left-radius: 4px;
+            margin-left: 4px;
+        }
+        .message-time {
+            font-size: 12px;
+            color: #999;
+            margin-top: 4px;
+            text-align: center;
+            width: 100%;
+            padding: 0 8px;
+        }
+        .product-card {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+        .product-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        .product-desc {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.5;
+        }
+        .product-features {
+            margin-top: 12px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .feature-tag {
+            background: #f5f5f5;
+            color: #666;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        .input-area {
+            position: fixed;
+            bottom: 83px;
+            left: 0;
+            right: 0;
+            background: white;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
+            z-index: 101;
+        }
+        .input-box {
+            flex: 1;
+            background: #f5f5f5;
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-size: 14px;
+            border: none;
+            outline: none;
+        }
+        .send-btn {
+            width: 32px;
+            height: 32px;
+            background: #653eb3;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            cursor: pointer;
+        }
+        .bottom-nav {
+            height: 83px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+        .safe-area-bottom {
+            height: 34px;
+            background: #fff;
+        }
+        .file-upload-btn, .emoji-btn {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            cursor: pointer;
+        }
+        .file-upload-btn:hover, .emoji-btn:hover {
+            color: #653eb3;
+        }
+        .quick-actions {
+            display: flex;
+            gap: 16px;
+            padding: 12px 16px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            position: fixed;
+            bottom: 127px;
+            left: 0;
+            right: 0;
+            z-index: 100;
+        }
+        .quick-actions::-webkit-scrollbar {
+            display: none;
+        }
+        .quick-action-item {
+            flex: 0 0 auto;
+            padding: 6px 12px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            white-space: nowrap;
+            color: #666;
+            font-size: 14px;
+            position: relative;
+            border-radius: 16px;
+            transition: all 0.2s ease;
+        }
+        .quick-action-item:nth-child(1) {
+            background: #E6F3FF;
+            color: #0066CC;
+        }
+        .quick-action-item:nth-child(2) {
+            background: #F0F7FF;
+            color: #653eb3;
+        }
+        .quick-action-item:nth-child(3) {
+            background: #F5F0FF;
+            color: #8B5CF6;
+        }
+        .quick-action-item:nth-child(4) {
+            background: #F0FFF4;
+            color: #059669;
+        }
+        .quick-action-item:nth-child(5) {
+            background: #FFF7ED;
+            color: #EA580C;
+        }
+        .quick-action-item:hover {
+            opacity: 0.8;
+        }
+        .quick-action-text {
+            font-size: 14px;
+            color: inherit;
+        }
+        .service-header {
+            background: white;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+        .service-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .service-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .service-avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .service-details {
+            flex: 1;
+        }
+        .service-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .service-status {
+            font-size: 12px;
+            padding: 2px 8px;
+            background: #dcfce7;
+            color: #16a34a;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+        .service-role {
+            font-size: 13px;
+            color: #666;
+        }
+    </style>
+</head>
+<body class="relative">
+    <!-- 状态栏 -->
+    <div class="status-bar">
+        <div>9:41</div>
+        <div class="flex items-center space-x-2">
+            <i class="fas fa-signal"></i>
+            <i class="fas fa-wifi"></i>
+            <i class="fas fa-battery-full"></i>
+        </div>
+    </div>
+
+    <!-- 聊天内容区域 -->
+    <div class="chat-container">
+        <!-- 客服信息区域 -->
+        <div class="service-header">
+            <div class="service-info">
+                <div class="service-avatar">
+                    <img src="images/3-2.svg" alt="客服头像">
+                </div>
+                <div class="service-details">
+                    <div class="service-name">
+                        在线客服
+                        <span class="service-status">在线</span>
+                    </div>
+                    <div class="service-role">工作时间：周一至周日 9:00-18:00</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 快捷操作区域 -->
+        <div class="quick-actions">
+            <div class="quick-action-item">
+                <span class="quick-action-text">产品咨询</span>
+            </div>
+            <div class="quick-action-item">
+                <span class="quick-action-text">申请流程</span>
+            </div>
+            <div class="quick-action-item">
+                <span class="quick-action-text">贷款利率</span>
+            </div>
+            <div class="quick-action-item">
+                <span class="quick-action-text">还款方式</span>
+            </div>
+            <div class="quick-action-item">
+                <span class="quick-action-text">人工服务</span>
+            </div>
+        </div>
+
+        <!-- 服务消息 -->
+        <div class="message service">
+            <div class="message-wrapper">
+                <img src="images/3-2.svg" alt="客服" class="message-avatar">
+                <div class="message-content">
+                    您好！我是您的专属客服，很高兴为您服务。请问有什么可以帮您？
+                </div>
+            </div>
+            <div class="message-time">09:41</div>
+        </div>
+
+        <!-- 用户消息 -->
+        <div class="message user">
+            <div class="message-wrapper">
+                <img src="images/logo.jpg" alt="用户" class="message-avatar">
+                <div class="message-content">
+                    我想了解一下贷款产品
+                </div>
+            </div>
+            <div class="message-time">09:42</div>
+        </div>
+
+        <!-- 服务消息 -->
+        <div class="message service">
+            <div class="message-wrapper">
+                <img src="images/3-2.svg" alt="客服" class="message-avatar">
+                <div class="message-content">
+                    好的，我们目前有三款主打产品供您选择：
+                </div>
+            </div>
+            <div class="message-time">09:42</div>
+        </div>
+
+        <!-- 产品卡片 -->
+        <div class="product-card">
+            <div class="product-title">小微保</div>
+            <div class="product-desc">
+                专为小微企业打造的信用贷款产品，无需抵押，快速放款，最高额度50万。
+            </div>
+            <div class="product-features">
+                <span class="feature-tag">无抵押</span>
+                <span class="feature-tag">快速放款</span>
+                <span class="feature-tag">最高50万</span>
+            </div>
+        </div>
+
+        <div class="product-card">
+            <div class="product-title">秒贷</div>
+            <div class="product-desc">
+                纯线上操作，3分钟完成申请，最快1小时放款，额度最高30万。
+            </div>
+            <div class="product-features">
+                <span class="feature-tag">纯线上</span>
+                <span class="feature-tag">极速放款</span>
+                <span class="feature-tag">最高30万</span>
+            </div>
+        </div>
+
+        <div class="product-card">
+            <div class="product-title">电商贷</div>
+            <div class="product-desc">
+                专为电商卖家设计，基于店铺经营数据授信，额度最高100万。
+            </div>
+            <div class="product-features">
+                <span class="feature-tag">数据授信</span>
+                <span class="feature-tag">高额度</span>
+                <span class="feature-tag">最高100万</span>
+            </div>
+        </div>
+
+        <!-- 服务消息 -->
+        <div class="message service">
+            <div class="message-wrapper">
+                <img src="images/3-2.svg" alt="客服" class="message-avatar">
+                <div class="message-content">
+                    您可以根据自己的需求选择合适的产品，我可以为您详细介绍每个产品的具体信息。
+                </div>
+            </div>
+            <div class="message-time">09:43</div>
+        </div>
+    </div>
+
+    <!-- 输入区域 -->
+    <div class="input-area">
+        <input type="text" class="input-box" placeholder="请输入您的问题">
+        <div class="emoji-btn">
+            <i class="far fa-smile"></i>
+        </div>
+        <div class="file-upload-btn">
+            <i class="fas fa-paperclip"></i>
+        </div>
+        <div class="send-btn">
+            <i class="fas fa-paper-plane"></i>
+        </div>
+    </div>
+
+    <!-- 底部导航栏 -->
+    <div class="bottom-nav">
+        <div class="grid grid-cols-4">
+            <div class="flex flex-col items-center py-2">
+                <a href="home.html" class="flex flex-col items-center">
+                    <img src="images/1-1.svg" alt="首页" class="w-6 h-6 mb-1">
+                    <span class="text-xs text-gray-500">首页</span>
+                </a>
+            </div>
+            <div class="flex flex-col items-center py-2">
+                <a href="todo.html" class="flex flex-col items-center">
+                    <img src="images/2-1.svg" alt="待办" class="w-6 h-6 mb-1">
+                    <span class="text-xs text-gray-500">待办</span>
+                </a>
+            </div>
+            <div class="flex flex-col items-center py-2">
+                <a href="service.html" class="flex flex-col items-center">
+                    <img src="images/3-2.svg" alt="客服" class="w-6 h-6 mb-1">
+                    <span class="text-xs text-[#653eb3]">客服</span>
+                </a>
+            </div>
+            <div class="flex flex-col items-center py-2">
+                <a href="profile.html" class="flex flex-col items-center">
+                    <img src="images/4-1.svg" alt="我的" class="w-6 h-6 mb-1">
+                    <span class="text-xs text-gray-500">我的</span>
+                </a>
+            </div>
+        </div>
+        <div class="safe-area-bottom"></div>
+    </div>
+
+    <script>
+        // 发送消息
+        const inputBox = document.querySelector('.input-box');
+        const sendBtn = document.querySelector('.send-btn');
+        const chatContainer = document.querySelector('.chat-container');
+
+        function addMessage(content, isUser = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'service'}`;
+            
+            const now = new Date();
+            const time = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+            
+            const avatarSrc = isUser ? 'images/logo.svg' : 'images/3-2.svg';
+            const avatarAlt = isUser ? '用户' : '客服';
+            
+            messageDiv.innerHTML = `
+                <div class="message-wrapper">
+                    <img src="${avatarSrc}" alt="${avatarAlt}" class="message-avatar">
+                    <div class="message-content">${content}</div>
+                </div>
+                <div class="message-time">${time}</div>
+            `;
+            
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        sendBtn.addEventListener('click', () => {
+            const content = inputBox.value.trim();
+            if (content) {
+                addMessage(content, true);
+                inputBox.value = '';
+                
+                // 模拟客服回复
+                setTimeout(() => {
+                    addMessage('感谢您的咨询，请问还有什么可以帮您？');
+                }, 1000);
+            }
+        });
+
+        inputBox.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendBtn.click();
+            }
+        });
+
+        // 快捷操作点击事件
+        document.querySelectorAll('.quick-action-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const text = item.querySelector('.quick-action-text').textContent;
+                addMessage(`我想了解${text}`, true);
+                
+                // 模拟客服回复
+                setTimeout(() => {
+                    addMessage(`好的，我来为您详细介绍${text}的相关信息。`);
+                }, 1000);
+            });
+        });
+    </script>
+</body>
+</html> 
