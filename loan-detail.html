@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>借据详情</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body {
+            width: 100%;
+            height: 100vh;
+            margin: 0;
+            background-color: #f5f5f5;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .status-bar {
+            background-color: #000;
+            color: white;
+            padding: 12px 16px;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            height: 59px;
+            box-sizing: border-box;
+        }
+        .status-bar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 59px;
+            background: #000;
+            z-index: -1;
+        }
+        .header {
+            background: white;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            position: sticky;
+            top: 59px;
+            left: 0;
+            right: 0;
+            z-index: 999;
+            border-bottom: 1px solid #f0f0f0;
+            justify-content: center;
+        }
+        .back-btn {
+            color: #333;
+            font-size: 16px;
+            padding: 8px;
+            margin-left: -8px;
+            position: absolute;
+            left: 16px;
+        }
+        .header-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+        .section {
+            margin: 12px;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .section-header {
+            padding: 16px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+        }
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .section-title i {
+            color: #653eb3;
+            font-size: 14px;
+        }
+        .section-toggle {
+            color: #666;
+            font-size: 14px;
+            transition: transform 0.3s ease;
+        }
+        .section-toggle.collapsed {
+            transform: rotate(-180deg);
+        }
+        .section-content {
+            padding: 16px;
+            max-height: 1000px;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        .section-content.collapsed {
+            max-height: 0;
+            padding: 0;
+        }
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+        .info-label {
+            color: #666;
+        }
+        .info-value {
+            color: #333;
+            font-weight: 500;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #f0f0f0;
+            border-radius: 3px;
+            overflow: visible;
+            margin: 12px 0;
+            position: relative;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #FFFFFF, #9370fa, #653eb3);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+            position: relative;
+        }
+        .progress-value {
+            position: absolute;
+            right: 0;
+            top: -18px;
+            font-size: 12px;
+            color: #653eb3;
+            font-weight: 500;
+            z-index: 1;
+            transform: translateX(50%);
+            white-space: nowrap;
+        }
+        .contract-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .contract-item:last-child {
+            border-bottom: none;
+        }
+        .contract-name {
+            font-size: 14px;
+            color: #333;
+        }
+        .contract-icon {
+            color: #999;
+            font-size: 14px;
+        }
+        .repayment-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .repayment-item:last-child {
+            border-bottom: none;
+        }
+        .repayment-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .repayment-period {
+            font-size: 14px;
+            color: #333;
+            font-weight: 500;
+        }
+        .repayment-date {
+            font-size: 12px;
+            color: #666;
+        }
+        .repayment-amount {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 4px;
+        }
+        .repayment-total {
+            font-size: 16px;
+            color: #333;
+            font-weight: 500;
+        }
+        .repayment-detail {
+            font-size: 12px;
+            color: #666;
+            text-align: right;
+        }
+        .repayment-button {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            padding: 16px;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+            z-index: 1000;
+        }
+        .repay-btn {
+            width: 100%;
+            background: linear-gradient(90deg, #9370fa, #653eb3);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: opacity 0.2s ease;
+        }
+        .repay-btn:active {
+            opacity: 0.9;
+        }
+        .loan-status {
+            font-size: 14px;
+            padding: 2px 8px;
+            border-radius: 12px;
+        }
+        .loan-status.normal {
+            color: #16a34a;
+            background: #dcfce7;
+        }
+        .loan-status.overdue {
+            color: #dc2626;
+            background: #fee2e2;
+        }
+        .loan-status.completed {
+            color: #666;
+            background: #f3f4f6;
+        }
+    </style>
+</head>
+<body>
+    <!-- 状态栏 -->
+    <div class="status-bar">
+        <div>9:41</div>
+        <div class="flex items-center space-x-2">
+            <i class="fas fa-signal"></i>
+            <i class="fas fa-wifi"></i>
+            <i class="fas fa-battery-full"></i>
+        </div>
+    </div>
+
+    <!-- 标题栏 -->
+    <div class="header">
+        <a href="#" class="back-btn" onclick="handleBack(event)">
+            <i class="fas fa-chevron-left"></i>
+        </a>
+        <div class="header-title">借据详情</div>
+    </div>
+
+    <!-- 借款详情 -->
+    <div class="section">
+        <div class="section-header">
+            <div class="section-title">
+                <i class="fas fa-info-circle"></i>
+                借款详情
+            </div>
+        </div>
+        <div class="section-content">
+            <div class="loan-info">
+                <div class="info-item">
+                    <div class="info-label">产品名称</div>
+                    <div class="info-value">小微保</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">借据号</div>
+                    <div class="info-value">202403150001</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">借据状态</div>
+                    <div class="loan-status normal">未结清</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">借款总金额</div>
+                    <div class="info-value">¥500,000</div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-bar-fill" style="width: 40%">
+                        <div class="progress-value">已还 40%</div>
+                    </div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">剩余待还本金</div>
+                    <div class="info-value">¥300,000</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">下一次还款日期</div>
+                    <div class="info-value">2024-04-15</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">借款期限</div>
+                    <div class="info-value">12个月</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">年化利率（单利）</div>
+                    <div class="info-value">4.35%</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">还款方式</div>
+                    <div class="info-value">等额本息</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 借款合同及协议 -->
+    <div class="section">
+        <div class="section-header" onclick="toggleSection(this)">
+            <div class="section-title">
+                <i class="fas fa-file-contract"></i>
+                借款合同及协议
+            </div>
+            <div class="section-toggle collapsed">
+                <i class="fas fa-chevron-up"></i>
+            </div>
+        </div>
+        <div class="section-content collapsed">
+            <div class="contract-item">
+                <div class="contract-name">借款合同</div>
+                <div class="contract-icon">
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+            </div>
+            <div class="contract-item">
+                <div class="contract-name">额度合同</div>
+                <div class="contract-icon">
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 还款计划 -->
+    <div class="section">
+        <div class="section-header" onclick="toggleSection(this)">
+            <div class="section-title">
+                <i class="fas fa-calendar-check"></i>
+                还款计划
+            </div>
+            <div class="section-toggle collapsed">
+                <i class="fas fa-chevron-up"></i>
+            </div>
+        </div>
+        <div class="section-content collapsed">
+            <div class="repayment-item">
+                <div class="repayment-info">
+                    <div class="repayment-period">第1期</div>
+                    <div class="repayment-date">2024-03-15</div>
+                </div>
+                <div class="repayment-amount">
+                    <div class="repayment-total">¥42,500</div>
+                    <div class="repayment-detail">本金 ¥41,500 · 利息 ¥800 · 手续费 ¥200</div>
+                </div>
+            </div>
+            <div class="repayment-item">
+                <div class="repayment-info">
+                    <div class="repayment-period">第2期</div>
+                    <div class="repayment-date">2024-04-15</div>
+                </div>
+                <div class="repayment-amount">
+                    <div class="repayment-total">¥42,500</div>
+                    <div class="repayment-detail">本金 ¥41,500 · 利息 ¥800 · 手续费 ¥200</div>
+                </div>
+            </div>
+            <div class="repayment-item">
+                <div class="repayment-info">
+                    <div class="repayment-period">第3期</div>
+                    <div class="repayment-date">2024-05-15</div>
+                </div>
+                <div class="repayment-amount">
+                    <div class="repayment-total">¥42,500</div>
+                    <div class="repayment-detail">本金 ¥41,500 · 利息 ¥800 · 手续费 ¥200</div>
+                </div>
+            </div>
+            <div class="repayment-item">
+                <div class="repayment-info">
+                    <div class="repayment-period">第4期</div>
+                    <div class="repayment-date">2024-06-15</div>
+                </div>
+                <div class="repayment-amount">
+                    <div class="repayment-total">¥42,500</div>
+                    <div class="repayment-detail">本金 ¥41,500 · 利息 ¥800 · 手续费 ¥200</div>
+                </div>
+            </div>
+            <div class="repayment-item">
+                <div class="repayment-info">
+                    <div class="repayment-period">第5期</div>
+                    <div class="repayment-date">2024-07-15</div>
+                </div>
+                <div class="repayment-amount">
+                    <div class="repayment-total">¥42,500</div>
+                    <div class="repayment-detail">本金 ¥41,500 · 利息 ¥800 · 手续费 ¥200</div>
+                </div>
+            </div>
+            <div class="repayment-item">
+                <div class="repayment-info">
+                    <div class="repayment-period">第6期</div>
+                    <div class="repayment-date">2024-08-15</div>
+                </div>
+                <div class="repayment-amount">
+                    <div class="repayment-total">¥42,500</div>
+                    <div class="repayment-detail">本金 ¥41,500 · 利息 ¥800 · 手续费 ¥200</div>
+                </div>
+            </div>
+            <div class="repayment-item">
+                <div class="repayment-info">
+                    <div class="repayment-period">第7期</div>
+                    <div class="repayment-date">2024-09-15</div>
+                </div>
+                <div class="repayment-amount">
+                    <div class="repayment-total">¥42,500</div>
+                    <div class="repayment-detail">本金 ¥41,500 · 利息 ¥800 · 手续费 ¥200</div>
+                </div>
+            </div>
+            <div class="repayment-item">
+                <div class="repayment-info">
+                    <div class="repayment-period">第8期</div>
+                    <div class="repayment-date">2024-10-15</div>
+                </div>
+                <div class="repayment-amount">
+                    <div class="repayment-total">¥42,500</div>
+                    <div class="repayment-detail">本金 ¥41,500 · 利息 ¥800 · 手续费 ¥200</div>
+                </div>
+            </div>
+            <div class="repayment-item">
+                <div class="repayment-info">
+                    <div class="repayment-period">第9期</div>
+                    <div class="repayment-date">2024-11-15</div>
+                </div>
+                <div class="repayment-amount">
+                    <div class="repayment-total">¥42,500</div>
+                    <div class="repayment-detail">本金 ¥41,500 · 利息 ¥800 · 手续费 ¥200</div>
+                </div>
+            </div>
+            <div class="repayment-item">
+                <div class="repayment-info">
+                    <div class="repayment-period">第10期</div>
+                    <div class="repayment-date">2024-12-15</div>
+                </div>
+                <div class="repayment-amount">
+                    <div class="repayment-total">¥42,500</div>
+                    <div class="repayment-detail">本金 ¥41,500 · 利息 ¥800 · 手续费 ¥200</div>
+                </div>
+            </div>
+            <div class="repayment-item">
+                <div class="repayment-info">
+                    <div class="repayment-period">第11期</div>
+                    <div class="repayment-date">2025-01-15</div>
+                </div>
+                <div class="repayment-amount">
+                    <div class="repayment-total">¥42,500</div>
+                    <div class="repayment-detail">本金 ¥41,500 · 利息 ¥800 · 手续费 ¥200</div>
+                </div>
+            </div>
+            <div class="repayment-item">
+                <div class="repayment-info">
+                    <div class="repayment-period">第12期</div>
+                    <div class="repayment-date">2025-02-15</div>
+                </div>
+                <div class="repayment-amount">
+                    <div class="repayment-total">¥42,500</div>
+                    <div class="repayment-detail">本金 ¥41,500 · 利息 ¥800 · 手续费 ¥200</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 立即还款按钮 -->
+    <div class="repayment-button">
+        <button class="repay-btn">立即还款</button>
+    </div>
+
+    <script>
+        function handleBack(event) {
+            event.preventDefault();
+            const urlParams = new URLSearchParams(window.location.search);
+            const fromPage = urlParams.get('from');
+            
+            if (fromPage === 'customer-detail') {
+                window.location.href = 'customer-detail.html';
+            } else {
+                window.location.href = 'my-loans.html';
+            }
+        }
+
+        function toggleSection(header) {
+            const toggle = header.querySelector('.section-toggle');
+            const content = header.nextElementSibling;
+            
+            toggle.classList.toggle('collapsed');
+            content.classList.toggle('collapsed');
+        }
+    </script>
+</body>
+</html> 

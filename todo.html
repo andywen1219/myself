@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>待办事项</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            background-color: #f5f5f5;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .status-bar {
+            background-color: #000;
+            color: white;
+            padding: 12px 16px;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            height: 59px;
+            box-sizing: border-box;
+        }
+        .status-bar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 59px;
+            background: #000;
+            z-index: -1;
+        }
+        .todo-tab {
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 12px 20px;
+            color: #666;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .todo-tab.active {
+            color: #653eb3;
+            font-weight: 600;
+        }
+        .todo-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 24px;
+            height: 2px;
+            background: #653eb3;
+            border-radius: 1px;
+        }
+        .task-type {
+            background: white;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+        .task-type-header {
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .task-type-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .task-type-title i {
+            font-size: 18px;
+        }
+        .task-type-title.approval i { color: #653eb3; }
+        .task-type-title.follow-up i { color: #16a34a; }
+        .task-type-title.other i { color: #ca8a04; }
+        .task-count {
+            font-size: 13px;
+            color: #666;
+            background: #f5f5f5;
+            padding: 4px 12px;
+            border-radius: 12px;
+        }
+        .task-item {
+            padding: 16px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+        .task-item:last-child {
+            border-bottom: none;
+        }
+        .task-item:hover {
+            background: #f8f9fa;
+        }
+        .task-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .task-type-tag {
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+            display: inline-block;
+            white-space: nowrap;
+        }
+        .task-type-tag.approval {
+            background: #f3e8fd;
+            color: #653eb3;
+        }
+        .task-type-tag.follow-up {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+        .task-type-tag.other {
+            background: #fef3c7;
+            color: #ca8a04;
+        }
+        .task-type-tag.high {
+            background: #fee2e2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+        .task-type-tag.medium {
+            background: #fff7ed;
+            color: #ea580c;
+            border: 1px solid #fed7aa;
+        }
+        .task-type-tag.low {
+            background: #f3f4f6;
+            color: #4b5563;
+            border: 1px solid #e5e7eb;
+        }
+        .task-title {
+            font-size: 15px;
+            color: #333;
+            line-height: 1.4;
+            font-weight: 500;
+            flex: 1;
+        }
+        .task-info {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+        .task-time {
+            font-size: 13px;
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .task-time i {
+            font-size: 12px;
+            color: #999;
+        }
+        .task-status {
+            font-size: 12px;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-weight: 500;
+            display: inline-block;
+            white-space: nowrap;
+        }
+        .task-status.today {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+        .task-status.upcoming {
+            background: #fef3c7;
+            color: #ca8a04;
+        }
+        .task-status.overdue {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+        .bottom-nav {
+            height: 83px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+        .safe-area-bottom {
+            height: 34px;
+            background: #fff;
+        }
+        .add-task-btn {
+            position: fixed;
+            right: 16px;
+            bottom: 100px;
+            width: 56px;
+            height: 56px;
+            background: #653eb3;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(101, 62, 179, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .add-task-btn:hover {
+            transform: scale(1.05);
+        }
+        .add-task-btn i {
+            color: white;
+            font-size: 24px;
+        }
+        .todo-header {
+            background: white;
+            padding: 20px;
+            margin-bottom: 16px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+        .todo-title-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .todo-title {
+            font-size: 22px;
+            font-weight: 600;
+            color: #333;
+        }
+        .completed-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background: #f8f9fa;
+            border-radius: 20px;
+            color: #653eb3;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+        .completed-btn:active {
+            background: #f0f0f0;
+            transform: scale(0.98);
+        }
+        .completed-btn i {
+            font-size: 14px;
+        }
+        .todo-stats {
+            display: flex;
+            gap: 8px;
+            width: 100%;
+        }
+        .todo-stat-item {
+            flex: 1;
+            text-align: center;
+            padding: 8px 4px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            transition: all 0.2s ease;
+            min-width: 0;
+        }
+        .todo-stat-item:hover {
+            background: #f0f0f0;
+        }
+        .todo-stat-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 2px;
+        }
+        .todo-stat-label {
+            font-size: 12px;
+            color: #666;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    </style>
+</head>
+<body class="relative">
+    <!-- 状态栏 -->
+    <div class="status-bar">
+        <div>9:41</div>
+        <div class="flex items-center space-x-2">
+            <i class="fas fa-signal"></i>
+            <i class="fas fa-wifi"></i>
+            <i class="fas fa-battery-full"></i>
+        </div>
+    </div>
+
+    <!-- 主内容区域 -->
+    <div class="px-4 pb-24">
+        <!-- 待办头部 -->
+        <div class="todo-header">
+            <div class="todo-title-row">
+                <div class="todo-title">待办事项</div>
+                <a href="completed-todo.html" class="completed-btn">
+                    <i class="fas fa-check-circle"></i>
+                    已办任务
+                </a>
+            </div>
+            <div class="todo-stats">
+                <div class="todo-stat-item">
+                    <div class="todo-stat-value">12</div>
+                    <div class="todo-stat-label">总待办</div>
+                </div>
+                <div class="todo-stat-item">
+                    <div class="todo-stat-value">5</div>
+                    <div class="todo-stat-label">今日待办</div>
+                </div>
+                <div class="todo-stat-item">
+                    <div class="todo-stat-value">3</div>
+                    <div class="todo-stat-label">即将到期</div>
+                </div>
+                <div class="todo-stat-item">
+                    <div class="todo-stat-value">2</div>
+                    <div class="todo-stat-label">已逾期</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 待办标签 -->
+        <div class="flex overflow-x-auto bg-white rounded-lg mb-4">
+            <div class="todo-tab active">全部</div>
+            <div class="todo-tab">今日</div>
+            <div class="todo-tab">即将到期</div>
+            <div class="todo-tab">逾期</div>
+        </div>
+
+        <!-- 待办任务列表 -->
+        <div class="space-y-4">
+            <!-- 全部任务 -->
+            <div class="task-content active">
+                <!-- 审批任务 -->
+                <div class="task-type">
+                    <div class="task-type-header">
+                        <div class="task-type-title approval">
+                            <i class="fas fa-check-circle"></i>
+                            审批任务
+                        </div>
+                        <div class="task-count">3个任务</div>
+                    </div>
+                    <div class="task-items">
+                        <div class="task-item">
+                            <div class="task-header">
+                                <span class="task-type-tag high">高优先级</span>
+                                <div class="task-title">客户张三的贷款申请审批</div>
+                            </div>
+                            <div class="task-info">
+                                <div class="task-time">
+                                    <i class="fas fa-clock"></i>
+                                    截止时间：今天 14:30
+                                </div>
+                                <span class="task-status today">今日待办</span>
+                            </div>
+                        </div>
+                        <div class="task-item">
+                            <div class="task-header">
+                                <span class="task-type-tag medium">中优先级</span>
+                                <div class="task-title">李四的额度调整审批</div>
+                            </div>
+                            <div class="task-info">
+                                <div class="task-time">
+                                    <i class="fas fa-clock"></i>
+                                    截止时间：明天 10:00
+                                </div>
+                                <span class="task-status upcoming">即将到期</span>
+                            </div>
+                        </div>
+                        <div class="task-item">
+                            <div class="task-header">
+                                <span class="task-type-tag low">低优先级</span>
+                                <div class="task-title">王五的还款延期审批</div>
+                            </div>
+                            <div class="task-info">
+                                <div class="task-time">
+                                    <i class="fas fa-clock"></i>
+                                    截止时间：昨天 18:00
+                                </div>
+                                <span class="task-status overdue">已逾期</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 客户跟进 -->
+                <div class="task-type">
+                    <div class="task-type-header">
+                        <div class="task-type-title follow-up">
+                            <i class="fas fa-user-clock"></i>
+                            客户跟进
+                        </div>
+                        <div class="task-count">5个任务</div>
+                    </div>
+                    <div class="task-items">
+                        <div class="task-item">
+                            <div class="task-header">
+                                <span class="task-type-tag high">高优先级</span>
+                                <div class="task-title">王五的还款提醒</div>
+                            </div>
+                            <div class="task-info">
+                                <div class="task-time">
+                                    <i class="fas fa-clock"></i>
+                                    截止时间：今天 16:00
+                                </div>
+                                <span class="task-status today">今日待办</span>
+                            </div>
+                        </div>
+                        <div class="task-item">
+                            <div class="task-header">
+                                <span class="task-type-tag medium">中优先级</span>
+                                <div class="task-title">赵六的逾期催收</div>
+                            </div>
+                            <div class="task-info">
+                                <div class="task-time">
+                                    <i class="fas fa-clock"></i>
+                                    截止时间：昨天 18:00
+                                </div>
+                                <span class="task-status overdue">已逾期</span>
+                            </div>
+                        </div>
+                        <div class="task-item">
+                            <div class="task-header">
+                                <span class="task-type-tag low">低优先级</span>
+                                <div class="task-title">李七的新客户回访</div>
+                            </div>
+                            <div class="task-info">
+                                <div class="task-time">
+                                    <i class="fas fa-clock"></i>
+                                    截止时间：明天 15:00
+                                </div>
+                                <span class="task-status upcoming">即将到期</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 其他任务 -->
+                <div class="task-type">
+                    <div class="task-type-header">
+                        <div class="task-type-title other">
+                            <i class="fas fa-tasks"></i>
+                            其他任务
+                        </div>
+                        <div class="task-count">4个任务</div>
+                    </div>
+                    <div class="task-items">
+                        <div class="task-item">
+                            <div class="task-header">
+                                <span class="task-type-tag high">高优先级</span>
+                                <div class="task-title">系统数据备份</div>
+                            </div>
+                            <div class="task-info">
+                                <div class="task-time">
+                                    <i class="fas fa-clock"></i>
+                                    截止时间：今天 23:00
+                                </div>
+                                <span class="task-status today">今日待办</span>
+                            </div>
+                        </div>
+                        <div class="task-item">
+                            <div class="task-header">
+                                <span class="task-type-tag medium">中优先级</span>
+                                <div class="task-title">月度报告整理</div>
+                            </div>
+                            <div class="task-info">
+                                <div class="task-time">
+                                    <i class="fas fa-clock"></i>
+                                    截止时间：明天 17:00
+                                </div>
+                                <span class="task-status upcoming">即将到期</span>
+                            </div>
+                        </div>
+                        <div class="task-item">
+                            <div class="task-header">
+                                <span class="task-type-tag low">低优先级</span>
+                                <div class="task-title">系统升级维护</div>
+                            </div>
+                            <div class="task-info">
+                                <div class="task-time">
+                                    <i class="fas fa-clock"></i>
+                                    截止时间：昨天 22:00
+                                </div>
+                                <span class="task-status overdue">已逾期</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 今日任务 -->
+            <div class="task-content">
+                <div class="task-type">
+                    <div class="task-type-header">
+                        <div class="task-type-title approval">
+                            <i class="fas fa-check-circle"></i>
+                            审批任务
+                        </div>
+                        <div class="task-count">1个任务</div>
+                    </div>
+                    <div class="task-items">
+                        <div class="task-item">
+                            <div class="task-header">
+                                <span class="task-type-tag high">高优先级</span>
+                                <div class="task-title">客户张三的贷款申请审批</div>
+                            </div>
+                            <div class="task-info">
+                                <div class="task-time">
+                                    <i class="fas fa-clock"></i>
+                                    截止时间：今天 14:30
+                                </div>
+                                <span class="task-status today">今日待办</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="task-type">
+                    <div class="task-type-header">
+                        <div class="task-type-title follow-up">
+                            <i class="fas fa-user-clock"></i>
+                            客户跟进
+                        </div>
+                        <div class="task-count">2个任务</div>
+                    </div>
+                    <div class="task-items">
+                        <div class="task-item">
+                            <div class="task-header">
+                                <span class="task-type-tag high">高优先级</span>
+                                <div class="task-title">王五的还款提醒</div>
+                            </div>
+                            <div class="task-info">
+                                <div class="task-time">
+                                    <i class="fas fa-clock"></i>
+                                    截止时间：今天 16:00
+                                </div>
+                                <span class="task-status today">今日待办</span>
+                            </div>
+                        </div>
+                        <div class="task-item">
+                            <div class="task-header">
+                                <span class="task-type-tag medium">中优先级</span>
+                                <div class="task-title">张八的客户回访</div>
+                            </div>
+                            <div class="task-info">
+                                <div class="task-time">
+                                    <i class="fas fa-clock"></i>
+                                    截止时间：今天 18:00
+                                </div>
+                                <span class="task-status today">今日待办</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="task-type">
+                    <div class="task-type-header">
+                        <div class="task-type-title other">
+                            <i class="fas fa-tasks"></i>
+                            其他任务
+                        </div>
+                        <div class="task-count">2个任务</div>
+                    </div>
+                    <div class="task-items">
+                        <div class="task-item">
+                            <div class="task-header">
+                                <span class="task-type-tag high">高优先级</span>
+                                <div class="task-title">系统数据备份</div>
+                            </div>
+                            <div class="task-info">
+                                <div class="task-time">
+                                    <i class="fas fa-clock"></i>
+                                    截止时间：今天 23:00
+                                </div>
+                                <span class="task-status today">今日待办</span>
+                            </div>
+                        </div>
+                        <div class="task-item">
+                            <div class="task-header">
+                                <span class="task-type-tag medium">中优先级</span>
+                                <div class="task-title">周报数据统计</div>
+                            </div>
+                            <div class="task-info">
+                                <div class="task-time">
+                                    <i class="fas fa-clock"></i>
+                                    截止时间：今天 20:00
+                                </div>
+                                <span class="task-status today">今日待办</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 即将到期任务 -->
+            <div class="task-content">
+                <div class="task-type">
+                    <div class="task-type-header">
+                        <div class="task-type-title approval">
+                            <i class="fas fa-check-circle"></i>
+                            审批任务
+                        </div>
+                        <div class="task-count">1个任务</div>
+                    </div>
+                    <div class="task-items">
+                        <div class="task-item">
+                            <div class="task-header">
+                                <span class="task-type-tag medium">中优先级</span>
+                                <div class="task-title">李四的额度调整审批</div>
+                            </div>
+                            <div class="task-info">
+                                <div class="task-time">
+                                    <i class="fas fa-clock"></i>
+                                    截止时间：明天 10:00
+                                </div>
+                                <span class="task-status upcoming">即将到期</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="task-type">
+                    <div class="task-type-header">
+                        <div class="task-type-title follow-up">
+                            <i class="fas fa-user-clock"></i>
+                            客户跟进
+                        </div>
+                        <div class="task-count">1个任务</div>
+                    </div>
+                    <div class="task-items">
+                        <div class="task-item">
+                            <div class="task-header">
+                                <span class="task-type-tag low">低优先级</span>
+                                <div class="task-title">李七的新客户回访</div>
+                            </div>
+                            <div class="task-info">
+                                <div class="task-time">
+                                    <i class="fas fa-clock"></i>
+                                    截止时间：明天 15:00
+                                </div>
+                                <span class="task-status upcoming">即将到期</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="task-type">
+                    <div class="task-type-header">
+                        <div class="task-type-title other">
+                            <i class="fas fa-tasks"></i>
+                            其他任务
+                        </div>
+                        <div class="task-count">1个任务</div>
+                    </div>
+                    <div class="task-items">
+                        <div class="task-item">
+                            <div class="task-header">
+                                <span class="task-type-tag medium">中优先级</span>
+                                <div class="task-title">月度报告整理</div>
+                            </div>
+                            <div class="task-info">
+                                <div class="task-time">
+                                    <i class="fas fa-clock"></i>
+                                    截止时间：明天 17:00
+                                </div>
+                                <span class="task-status upcoming">即将到期</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 逾期任务 -->
+            <div class="task-content">
+                <div class="task-type">
+                    <div class="task-type-header">
+                        <div class="task-type-title approval">
+                            <i class="fas fa-check-circle"></i>
+                            审批任务
+                        </div>
+                        <div class="task-count">1个任务</div>
+                    </div>
+                    <div class="task-items">
+                        <div class="task-item">
+                            <div class="task-header">
+                                <span class="task-type-tag low">低优先级</span>
+                                <div class="task-title">王五的还款延期审批</div>
+                            </div>
+                            <div class="task-info">
+                                <div class="task-time">
+                                    <i class="fas fa-clock"></i>
+                                    截止时间：昨天 18:00
+                                </div>
+                                <span class="task-status overdue">已逾期</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="task-type">
+                    <div class="task-type-header">
+                        <div class="task-type-title follow-up">
+                            <i class="fas fa-user-clock"></i>
+                            客户跟进
+                        </div>
+                        <div class="task-count">1个任务</div>
+                    </div>
+                    <div class="task-items">
+                        <div class="task-item">
+                            <div class="task-header">
+                                <span class="task-type-tag high">高优先级</span>
+                                <div class="task-title">赵六的逾期催收</div>
+                            </div>
+                            <div class="task-info">
+                                <div class="task-time">
+                                    <i class="fas fa-clock"></i>
+                                    截止时间：昨天 18:00
+                                </div>
+                                <span class="task-status overdue">已逾期</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="task-type">
+                    <div class="task-type-header">
+                        <div class="task-type-title other">
+                            <i class="fas fa-tasks"></i>
+                            其他任务
+                        </div>
+                        <div class="task-count">1个任务</div>
+                    </div>
+                    <div class="task-items">
+                        <div class="task-item">
+                            <div class="task-header">
+                                <span class="task-type-tag low">低优先级</span>
+                                <div class="task-title">系统升级维护</div>
+                            </div>
+                            <div class="task-info">
+                                <div class="task-time">
+                                    <i class="fas fa-clock"></i>
+                                    截止时间：昨天 22:00
+                                </div>
+                                <span class="task-status overdue">已逾期</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 新增任务按钮 -->
+    <a href="add-todo.html" class="add-task-btn">
+        <i class="fas fa-plus"></i>
+    </a>
+
+    <!-- 底部导航栏 -->
+    <div class="bottom-nav">
+        <div class="grid grid-cols-4">
+            <div class="flex flex-col items-center py-2">
+                <a href="home.html" class="flex flex-col items-center">
+                    <img src="images/1-1.svg" alt="首页" class="w-6 h-6 mb-1">
+                    <span class="text-xs text-gray-500">首页</span>
+                </a>
+            </div>
+            <div class="flex flex-col items-center py-2">
+                <img src="images/2-2.svg" alt="待办" class="w-6 h-6 mb-1">
+                <span class="text-xs text-[#653eb3]">待办</span>
+            </div>
+            <div class="flex flex-col items-center py-2">
+                <a href="service.html" class="flex flex-col items-center">
+                    <img src="images/3-1.svg" alt="客服" class="w-6 h-6 mb-1">
+                    <span class="text-xs text-gray-500">客服</span>
+                </a>
+            </div>
+            <div class="flex flex-col items-center py-2">
+                <a href="profile.html" class="flex flex-col items-center">
+                    <img src="images/4-1.svg" alt="我的" class="w-6 h-6 mb-1">
+                    <span class="text-xs text-gray-500">我的</span>
+                </a>
+            </div>
+        </div>
+        <div class="safe-area-bottom"></div>
+    </div>
+
+    <script>
+        // 任务类型展开/收起
+        document.querySelectorAll('.task-type-header').forEach(header => {
+            header.addEventListener('click', () => {
+                const taskItems = header.nextElementSibling;
+                taskItems.style.display = taskItems.style.display === 'none' ? 'block' : 'none';
+            });
+        });
+
+        // 任务复选框点击
+        document.querySelectorAll('.task-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('click', () => {
+                checkbox.classList.toggle('checked');
+            });
+        });
+
+        // 标签切换
+        const tabs = document.querySelectorAll('.todo-tab');
+        const contents = document.querySelectorAll('.task-content');
+        
+        // 初始化显示和隐藏所有内容
+        contents.forEach((content, index) => {
+            if (index === 0) {
+                content.style.display = 'block'; // 显示第一个（全部）内容
+            } else {
+                content.style.display = 'none'; // 隐藏其他内容
+            }
+        });
+        
+        tabs.forEach((tab, index) => {
+            tab.addEventListener('click', () => {
+                // 移除所有标签的激活状态
+                tabs.forEach(t => t.classList.remove('active'));
+                // 添加当前标签的激活状态
+                tab.classList.add('active');
+                // 隐藏所有内容
+                contents.forEach(c => c.style.display = 'none');
+                // 显示当前标签对应的内容
+                contents[index].style.display = 'block';
+            });
+        });
+    </script>
+</body>
+</html> 

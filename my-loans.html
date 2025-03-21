@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的借款</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body {
+            width: 100%;
+            height: 100vh;
+            margin: 0;
+            background-color: #f5f5f5;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .status-bar {
+            background-color: #000;
+            color: white;
+            padding: 12px 16px;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            height: 59px;
+            box-sizing: border-box;
+        }
+        .status-bar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 59px;
+            background: #000;
+            z-index: -1;
+        }
+        .header {
+            background: white;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            position: sticky;
+            top: 59px;
+            left: 0;
+            right: 0;
+            z-index: 999;
+            border-bottom: 1px solid #f0f0f0;
+            justify-content: center;
+        }
+        .back-btn {
+            color: #333;
+            font-size: 16px;
+            padding: 8px;
+            margin-left: -8px;
+            position: absolute;
+            left: 16px;
+        }
+        .header-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+        .header-right {
+            color: #653eb3;
+            font-size: 14px;
+            padding: 8px;
+            margin-right: -8px;
+            position: absolute;
+            right: 16px;
+        }
+        .loan-section {
+            margin: 12px;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .section-header {
+            padding: 16px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+        }
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .section-title i {
+            color: #653eb3;
+            font-size: 14px;
+        }
+        .section-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .section-count {
+            font-size: 12px;
+            color: #666;
+        }
+        .section-toggle {
+            color: #666;
+            font-size: 14px;
+            transition: transform 0.3s ease;
+        }
+        .section-toggle.collapsed {
+            transform: rotate(-180deg);
+        }
+        .loan-list {
+            padding: 0 16px;
+            max-height: 1000px;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        .loan-list.collapsed {
+            max-height: 0;
+            padding: 0;
+        }
+        .loan-item {
+            padding: 16px 0;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            position: relative;
+        }
+        .loan-item:active {
+            background-color: #f8f9fa;
+        }
+        .loan-item::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%) rotate(45deg);
+            width: 8px;
+            height: 8px;
+            border-top: 2px solid #999;
+            border-right: 2px solid #999;
+        }
+        .loan-item:last-child {
+            border-bottom: none;
+        }
+        .loan-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        .loan-id {
+            font-size: 14px;
+            color: #666;
+        }
+        .loan-status {
+            font-size: 14px;
+            color: #16a34a;
+            background: #dcfce7;
+            padding: 2px 8px;
+            border-radius: 12px;
+        }
+        .loan-amount {
+            font-size: 24px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        .loan-info {
+            display: flex;
+            gap: 24px;
+            font-size: 13px;
+            color: #666;
+        }
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .info-label {
+            color: #999;
+        }
+        .info-value {
+            color: #333;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #f0f0f0;
+            border-radius: 3px;
+            overflow: visible;
+            margin: 12px 0;
+            position: relative;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #FFFFFF, #9370fa, #653eb3);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+            position: relative;
+        }
+        .progress-value {
+            position: absolute;
+            right: 0;
+            top: -18px;
+            font-size: 12px;
+            color: #653eb3;
+            font-weight: 500;
+            z-index: 1;
+            transform: translateX(50%);
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body>
+    <!-- 状态栏 -->
+    <div class="status-bar">
+        <div>9:41</div>
+        <div class="flex items-center space-x-2">
+            <i class="fas fa-signal"></i>
+            <i class="fas fa-wifi"></i>
+            <i class="fas fa-battery-full"></i>
+        </div>
+    </div>
+
+    <!-- 标题栏 -->
+    <div class="header">
+        <a href="profile.html" class="back-btn">
+            <i class="fas fa-chevron-left"></i>
+        </a>
+        <div class="header-title">我的借款</div>
+        <a href="loan-history.html" class="header-right">借款记录</a>
+    </div>
+
+    <!-- 小微保产品 -->
+    <div class="loan-section">
+        <div class="section-header" onclick="toggleSection(this)">
+            <div class="section-title">
+                <i class="fas fa-building"></i>
+                小微保
+            </div>
+            <div class="section-right">
+                <div class="section-count">2笔未结清</div>
+                <div class="section-toggle">
+                    <i class="fas fa-chevron-up"></i>
+                </div>
+            </div>
+        </div>
+        <div class="loan-list">
+            <div class="loan-item" onclick="goToLoanDetail('202403150001')">
+                <div class="loan-header">
+                    <div class="loan-id">借据号：202403150001</div>
+                    <div class="loan-status">未结清</div>
+                </div>
+                <div class="loan-amount">¥500,000</div>
+                <div class="progress-bar">
+                    <div class="progress-bar-fill" style="width: 40%">
+                        <div class="progress-value">已还 40%</div>
+                    </div>
+                </div>
+                <div class="loan-info">
+                    <div class="info-item">
+                        <div class="info-label">本金余额</div>
+                        <div class="info-value">¥300,000</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">借款期限</div>
+                        <div class="info-value">12个月</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">借款日期</div>
+                        <div class="info-value">2024-03-15</div>
+                    </div>
+                </div>
+            </div>
+            <div class="loan-item" onclick="goToLoanDetail('202403100001')">
+                <div class="loan-header">
+                    <div class="loan-id">借据号：202403100001</div>
+                    <div class="loan-status">未结清</div>
+                </div>
+                <div class="loan-amount">¥300,000</div>
+                <div class="progress-bar">
+                    <div class="progress-bar-fill" style="width: 25%">
+                        <div class="progress-value">已还 25%</div>
+                    </div>
+                </div>
+                <div class="loan-info">
+                    <div class="info-item">
+                        <div class="info-label">本金余额</div>
+                        <div class="info-value">¥200,000</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">借款期限</div>
+                        <div class="info-value">12个月</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">借款日期</div>
+                        <div class="info-value">2024-03-10</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 秒贷产品 -->
+    <div class="loan-section">
+        <div class="section-header" onclick="toggleSection(this)">
+            <div class="section-title">
+                <i class="fas fa-bolt"></i>
+                秒贷
+            </div>
+            <div class="section-right">
+                <div class="section-count">1笔未结清</div>
+                <div class="section-toggle">
+                    <i class="fas fa-chevron-up"></i>
+                </div>
+            </div>
+        </div>
+        <div class="loan-list">
+            <div class="loan-item" onclick="goToLoanDetail('202403050001')">
+                <div class="loan-header">
+                    <div class="loan-id">借据号：202403050001</div>
+                    <div class="loan-status">未结清</div>
+                </div>
+                <div class="loan-amount">¥200,000</div>
+                <div class="progress-bar">
+                    <div class="progress-bar-fill" style="width: 15%">
+                        <div class="progress-value">已还 15%</div>
+                    </div>
+                </div>
+                <div class="loan-info">
+                    <div class="info-item">
+                        <div class="info-label">本金余额</div>
+                        <div class="info-value">¥150,000</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">借款期限</div>
+                        <div class="info-value">12个月</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">借款日期</div>
+                        <div class="info-value">2024-03-05</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleSection(header) {
+            const toggle = header.querySelector('.section-toggle');
+            const list = header.nextElementSibling;
+            
+            toggle.classList.toggle('collapsed');
+            list.classList.toggle('collapsed');
+        }
+
+        function goToLoanDetail(loanId) {
+            // 跳转到借据详情页
+            window.location.href = `loan-detail.html?id=${loanId}`;
+        }
+    </script>
+</body>
+</html> 

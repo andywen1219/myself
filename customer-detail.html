@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>客户详情</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            background-color: #f5f5f5;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            -webkit-overflow-scrolling: touch;
+        }
+        .status-bar {
+            background-color: #000;
+            color: white;
+            padding: 12px 16px;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            height: 59px;
+            box-sizing: border-box;
+        }
+        .nav-bar {
+            background: white;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            position: sticky;
+            top: 59px;
+            left: 0;
+            right: 0;
+            z-index: 999;
+            border-bottom: 1px solid #f0f0f0;
+            justify-content: center;
+        }
+        .back-button {
+            color: #333;
+            font-size: 16px;
+            padding: 8px;
+            margin-left: -8px;
+            position: absolute;
+            left: 16px;
+        }
+        .page-title {
+            font-size: 17px;
+            font-weight: 600;
+            color: #333;
+            flex: 1;
+            text-align: center;
+            margin: 0 32px;
+        }
+        .info-card {
+            background: white;
+            border-radius: 12px;
+            margin: 16px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+        .info-header {
+            padding: 16px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .info-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+        .info-content {
+            padding: 16px;
+        }
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        .info-label {
+            color: #666;
+            font-size: 14px;
+        }
+        .info-value {
+            color: #333;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .loan-amount {
+            font-size: 24px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        .loan-label {
+            font-size: 13px;
+            color: #666;
+        }
+        .loan-product {
+            background: white;
+            border-radius: 12px;
+            margin: 16px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+        .product-header {
+            padding: 16px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+            transition: background-color 0.2s ease;
+        }
+        .product-header:hover {
+            background-color: #f8f9fa;
+        }
+        .product-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .product-header .toggle-icon {
+            font-size: 14px;
+            color: #666;
+            transition: transform 0.3s ease;
+        }
+        .product-header.collapsed .toggle-icon {
+            transform: rotate(-90deg);
+        }
+        .loan-records {
+            transition: max-height 0.3s ease;
+            overflow: hidden;
+            max-height: 1000px;
+        }
+        .loan-records.collapsed {
+            max-height: 0;
+        }
+        .loan-record {
+            padding: 16px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .loan-record:hover {
+            background-color: #f8f9fa;
+        }
+        .loan-record:last-child {
+            border-bottom: none;
+        }
+        .record-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .record-id {
+            font-size: 15px;
+            font-weight: 500;
+            color: #333;
+        }
+        .record-status {
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+        .status-active {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+        .status-closed {
+            background: #f3f4f6;
+            color: #4b5563;
+        }
+        .record-info {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+        .record-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .record-value {
+            font-size: 15px;
+            font-weight: 500;
+            color: #333;
+        }
+        .record-label {
+            font-size: 12px;
+            color: #666;
+        }
+    </style>
+</head>
+<body class="pb-8">
+    <!-- 状态栏 -->
+    <div class="status-bar">
+        <div>9:41</div>
+        <div class="flex items-center space-x-2">
+            <i class="fas fa-signal"></i>
+            <i class="fas fa-wifi"></i>
+            <i class="fas fa-battery-full"></i>
+        </div>
+    </div>
+
+    <!-- 导航栏 -->
+    <div class="nav-bar">
+        <a href="javascript:history.back()" class="back-button">
+            <i class="fas fa-chevron-left"></i>
+        </a>
+        <div class="page-title">客户详情</div>
+        <div class="w-8"></div>
+    </div>
+
+    <!-- 基本信息 -->
+    <div class="info-card">
+        <div class="info-header">
+            <i class="fas fa-user text-[#653eb3]"></i>
+            <div class="info-title">基本信息</div>
+        </div>
+        <div class="info-content">
+            <div class="info-item">
+                <div class="info-label">网点编号</div>
+                <div class="info-value">666888</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">网点名称</div>
+                <div class="info-value">上海浦东银东路</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">企业名称</div>
+                <div class="info-value">上海某某运输有限公司</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 汇总信息 -->
+    <div class="info-card">
+        <div class="info-header">
+            <i class="fas fa-chart-pie text-[#653eb3]"></i>
+            <div class="info-title">汇总信息</div>
+        </div>
+        <div class="info-content">
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div class="text-center">
+                    <div class="loan-amount">¥2,500,000</div>
+                    <div class="loan-label">贷款总金额</div>
+                </div>
+                <div class="text-center">
+                    <div class="loan-amount">¥1,800,000</div>
+                    <div class="loan-label">未还总金额</div>
+                </div>
+            </div>
+            <div class="bg-[#f8f9fa] p-4 rounded-lg">
+                <div class="flex justify-between items-center mb-2">
+                    <div class="text-sm text-gray-600">下一次还款日</div>
+                    <div class="text-base font-medium">2024-03-25</div>
+                </div>
+                <div class="flex justify-between items-center">
+                    <div class="text-sm text-gray-600">还款金额</div>
+                    <div class="text-base font-medium text-[#653eb3]">¥50,000</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 贷款产品信息 -->
+    <div class="loan-product">
+        <div class="product-header" onclick="toggleProduct(this)">
+            <div class="product-title">
+                <i class="fas fa-file-invoice-dollar text-[#653eb3]"></i>
+                小微保
+            </div>
+            <div class="flex items-center gap-2">
+                <div class="text-sm text-gray-500">3笔借据</div>
+                <i class="fas fa-chevron-down toggle-icon"></i>
+            </div>
+        </div>
+        <div class="loan-records">
+            <div class="loan-record" onclick="window.location.href='loan-detail.html?from=customer-detail'">
+                <div class="record-header">
+                    <div class="record-id">借据编号：JJ20240315001</div>
+                    <div class="record-status status-active">正常</div>
+                </div>
+                <div class="record-info">
+                    <div class="record-item">
+                        <div class="record-value">¥1,000,000</div>
+                        <div class="record-label">贷款金额</div>
+                    </div>
+                    <div class="record-item">
+                        <div class="record-value">¥800,000</div>
+                        <div class="record-label">未还本金</div>
+                    </div>
+                    <div class="record-item">
+                        <div class="record-value">2024-01-15</div>
+                        <div class="record-label">借款日期</div>
+                    </div>
+                </div>
+            </div>
+            <div class="loan-record" onclick="window.location.href='loan-detail.html?from=customer-detail'">
+                <div class="record-header">
+                    <div class="record-id">借据编号：JJ20240315002</div>
+                    <div class="record-status status-active">正常</div>
+                </div>
+                <div class="record-info">
+                    <div class="record-item">
+                        <div class="record-value">¥800,000</div>
+                        <div class="record-label">贷款金额</div>
+                    </div>
+                    <div class="record-item">
+                        <div class="record-value">¥600,000</div>
+                        <div class="record-label">未还本金</div>
+                    </div>
+                    <div class="record-item">
+                        <div class="record-value">2024-02-01</div>
+                        <div class="record-label">借款日期</div>
+                    </div>
+                </div>
+            </div>
+            <div class="loan-record" onclick="window.location.href='loan-detail.html?from=customer-detail'">
+                <div class="record-header">
+                    <div class="record-id">借据编号：JJ20240315003</div>
+                    <div class="record-status status-active">正常</div>
+                </div>
+                <div class="record-info">
+                    <div class="record-item">
+                        <div class="record-value">¥700,000</div>
+                        <div class="record-label">贷款金额</div>
+                    </div>
+                    <div class="record-item">
+                        <div class="record-value">¥400,000</div>
+                        <div class="record-label">未还本金</div>
+                    </div>
+                    <div class="record-item">
+                        <div class="record-value">2024-02-15</div>
+                        <div class="record-label">借款日期</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="loan-product">
+        <div class="product-header" onclick="toggleProduct(this)">
+            <div class="product-title">
+                <i class="fas fa-file-invoice-dollar text-[#653eb3]"></i>
+                秒贷
+            </div>
+            <div class="flex items-center gap-2">
+                <div class="text-sm text-gray-500">1笔借据</div>
+                <i class="fas fa-chevron-down toggle-icon"></i>
+            </div>
+        </div>
+        <div class="loan-records">
+            <div class="loan-record" onclick="window.location.href='loan-detail.html?from=customer-detail'">
+                <div class="record-header">
+                    <div class="record-id">借据编号：JJ20240315004</div>
+                    <div class="record-status status-closed">已结清</div>
+                </div>
+                <div class="record-info">
+                    <div class="record-item">
+                        <div class="record-value">¥500,000</div>
+                        <div class="record-label">贷款金额</div>
+                    </div>
+                    <div class="record-item">
+                        <div class="record-value">¥0</div>
+                        <div class="record-label">未还本金</div>
+                    </div>
+                    <div class="record-item">
+                        <div class="record-value">2023-12-01</div>
+                        <div class="record-label">借款日期</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    function toggleProduct(header) {
+        header.classList.toggle('collapsed');
+        const records = header.nextElementSibling;
+        records.classList.toggle('collapsed');
+    }
+    </script>
+</body>
+</html> 

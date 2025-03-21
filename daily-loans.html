@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>今日数据</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body {
+            width: 100%;
+            height: 100vh;
+            margin: 0;
+            background-color: #f5f5f5;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .status-bar {
+            background-color: #000;
+            color: white;
+            padding: 12px 16px;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            height: 59px;
+            box-sizing: border-box;
+        }
+        .status-bar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 59px;
+            background: #000;
+            z-index: -1;
+        }
+        .header {
+            background: white;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            position: sticky;
+            top: 59px;
+            left: 0;
+            right: 0;
+            z-index: 999;
+            border-bottom: 1px solid #f0f0f0;
+            justify-content: center;
+        }
+        .back-btn {
+            color: #333;
+            font-size: 16px;
+            padding: 8px;
+            margin-left: -8px;
+            position: absolute;
+            left: 16px;
+        }
+        .header-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+        .tab-container {
+            background: white;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+        .tab-header {
+            display: flex;
+            border-bottom: 1px solid #e5e7eb;
+            margin-bottom: 16px;
+        }
+        .tab-item {
+            flex: 1;
+            text-align: center;
+            padding: 12px 0;
+            color: #666;
+            font-size: 14px;
+            position: relative;
+            cursor: pointer;
+        }
+        .tab-item.active {
+            color: #653eb3;
+            font-weight: 500;
+        }
+        .tab-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #653eb3;
+        }
+        .data-cards {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .data-card {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 16px;
+        }
+        .data-card-title {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+        .data-card-value {
+            color: #333;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        .data-card-value.amount {
+            color: #653eb3;
+        }
+        .table-container {
+            background: white;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .customer-table {
+            width: 100%;
+            min-width: 800px;
+            border-collapse: collapse;
+        }
+        .customer-table th,
+        .customer-table td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
+        }
+        .customer-table th {
+            background-color: #f9fafb;
+            color: #666;
+            font-weight: 500;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+        .customer-table td {
+            color: #333;
+        }
+        .customer-table tr:last-child td {
+            border-bottom: none;
+        }
+        .customer-table tr:not(:first-child):hover {
+            background-color: #f8f9fa;
+            transition: background-color 0.2s ease;
+        }
+        .amount {
+            color: #653eb3;
+            font-weight: 500;
+        }
+        .remaining {
+            color: #16a34a;
+        }
+        .overdue {
+            color: #dc2626;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- 状态栏 -->
+    <div class="status-bar">
+        <div>9:41</div>
+        <div class="flex items-center space-x-2">
+            <i class="fas fa-signal"></i>
+            <i class="fas fa-wifi"></i>
+            <i class="fas fa-battery-full"></i>
+        </div>
+    </div>
+
+    <!-- 标题栏 -->
+    <div class="header">
+        <a href="home.html" class="back-btn">
+            <i class="fas fa-chevron-left"></i>
+        </a>
+        <div class="header-title">今日数据</div>
+    </div>
+
+    <!-- Tab切换 -->
+    <div class="tab-container">
+        <div class="tab-header">
+            <div class="tab-item active" onclick="switchTab('loans')">今日借款</div>
+            <div class="tab-item" onclick="switchTab('overdue')">今日逾期</div>
+        </div>
+
+        <!-- 今日借款内容 -->
+        <div id="loans-content" class="tab-content active">
+            <div class="data-cards">
+                <div class="data-card">
+                    <div class="data-card-title">新增客户数</div>
+                    <div class="data-card-value">5</div>
+                </div>
+                <div class="data-card">
+                    <div class="data-card-title">新增借款总额</div>
+                    <div class="data-card-value amount">¥1,650,000</div>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table class="customer-table">
+                    <thead>
+                        <tr>
+                            <th>网点编号</th>
+                            <th>新增借款</th>
+                            <th>总借款金额</th>
+                            <th>网点名称</th>
+                            <th>企业名称</th>
+                            <th>总额度</th>
+                            <th>剩余额度</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr onclick="window.location.href='customer-detail.html'" style="cursor: pointer">
+                            <td>552001</td>
+                            <td class="amount">¥500,000</td>
+                            <td class="amount">¥1,500,000</td>
+                            <td>安徽省新淮北市</td>
+                            <td>天津上东货运代理有限公司</td>
+                            <td class="amount">¥1,000,000</td>
+                            <td class="remaining">¥500,000</td>
+                        </tr>
+                        <tr onclick="window.location.href='customer-detail.html'" style="cursor: pointer">
+                            <td>552002</td>
+                            <td class="amount">¥300,000</td>
+                            <td class="amount">¥800,000</td>
+                            <td>安徽省宿州市砀山县</td>
+                            <td>佛山成涛物流有限公司</td>
+                            <td class="amount">¥800,000</td>
+                            <td class="remaining">¥500,000</td>
+                        </tr>
+                        <tr onclick="window.location.href='customer-detail.html'" style="cursor: pointer">
+                            <td>552003</td>
+                            <td class="amount">¥200,000</td>
+                            <td class="amount">¥600,000</td>
+                            <td>安徽省蚌埠市</td>
+                            <td>上海顶浪货运代理有限公司</td>
+                            <td class="amount">¥600,000</td>
+                            <td class="remaining">¥400,000</td>
+                        </tr>
+                        <tr onclick="window.location.href='customer-detail.html'" style="cursor: pointer">
+                            <td>552004</td>
+                            <td class="amount">¥400,000</td>
+                            <td class="amount">¥1,200,000</td>
+                            <td>安徽省合肥市瑶海区御景湾</td>
+                            <td>南宁市松圆商贸有限公司</td>
+                            <td class="amount">¥1,200,000</td>
+                            <td class="remaining">¥800,000</td>
+                        </tr>
+                        <tr onclick="window.location.href='customer-detail.html'" style="cursor: pointer">
+                            <td>552005</td>
+                            <td class="amount">¥250,000</td>
+                            <td class="amount">¥700,000</td>
+                            <td>安徽省蚌埠市蚌山区</td>
+                            <td>西安常兴速递服务有限公司</td>
+                            <td class="amount">¥700,000</td>
+                            <td class="remaining">¥450,000</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 今日逾期内容 -->
+        <div id="overdue-content" class="tab-content">
+            <div class="data-cards">
+                <div class="data-card">
+                    <div class="data-card-title">新增逾期客户数</div>
+                    <div class="data-card-value">2</div>
+                </div>
+                <div class="data-card">
+                    <div class="data-card-title">新增逾期总额</div>
+                    <div class="data-card-value overdue">¥350,000</div>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table class="customer-table">
+                    <thead>
+                        <tr>
+                            <th>网点编号</th>
+                            <th>新增逾期金额</th>
+                            <th>逾期总额</th>
+                            <th>总借款金额</th>
+                            <th>网点名称</th>
+                            <th>企业名称</th>
+                            <th>总额度</th>
+                            <th>剩余额度</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr onclick="window.location.href='customer-detail.html'" style="cursor: pointer">
+                            <td>552006</td>
+                            <td class="amount overdue">¥200,000</td>
+                            <td class="amount overdue">¥400,000</td>
+                            <td class="amount">¥500,000</td>
+                            <td>安徽省合肥市包河区</td>
+                            <td>广州速达物流有限公司</td>
+                            <td class="amount">¥500,000</td>
+                            <td class="remaining">¥300,000</td>
+                        </tr>
+                        <tr onclick="window.location.href='customer-detail.html'" style="cursor: pointer">
+                            <td>552007</td>
+                            <td class="amount overdue">¥150,000</td>
+                            <td class="amount overdue">¥300,000</td>
+                            <td class="amount">¥400,000</td>
+                            <td>安徽省芜湖市镜湖区</td>
+                            <td>深圳快运物流有限公司</td>
+                            <td class="amount">¥400,000</td>
+                            <td class="remaining">¥250,000</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tab) {
+            // 更新tab样式
+            document.querySelectorAll('.tab-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // 更新内容显示
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(tab + '-content').classList.add('active');
+        }
+    </script>
+</body>
+</html> 
