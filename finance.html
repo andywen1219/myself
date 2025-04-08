@@ -250,7 +250,7 @@
         </div>
 
         <!-- 申请按钮 -->
-        <button class="apply-btn">立即申请</button>
+        <button class="apply-btn" id="enterprise-apply-btn">立即申请</button>
 
         <!-- 网点信息 -->
         <div class="branch-info">
@@ -295,7 +295,7 @@
         </div>
 
         <!-- 申请按钮 -->
-        <button class="apply-btn">立即申请</button>
+        <button class="apply-btn" id="personal-apply-btn">立即申请</button>
     </div>
 
     <script>
@@ -325,6 +325,18 @@
                 // 这里可以添加网点切换的逻辑
                 alert('切换网点');
             });
+        });
+        
+        // 申请按钮点击事件
+        const enterpriseApplyBtn = document.getElementById('enterprise-apply-btn');
+        const personalApplyBtn = document.getElementById('personal-apply-btn');
+        
+        enterpriseApplyBtn.addEventListener('click', () => {
+            window.location.href = 'loan-application.html';
+        });
+        
+        personalApplyBtn.addEventListener('click', () => {
+            window.location.href = 'loan-application.html';
         });
     </script>
 </body>

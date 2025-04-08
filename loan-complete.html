@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <!-- 申请借款完成页面 -->
+    <title>借款申请完成页面</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            background-color: #f5f5f5;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .status-bar {
+            background-color: #000;
+            color: white;
+            padding: 12px 16px;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            height: 59px;
+            box-sizing: border-box;
+        }
+        .status-bar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 59px;
+            background: #000;
+            z-index: -1;
+        }
+        .header {
+            background: white;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            position: fixed;
+            top: 59px;
+            left: 0;
+            right: 0;
+            z-index: 999;
+            border-bottom: 1px solid #f0f0f0;
+            justify-content: center;
+        }
+        .back-btn {
+            color: #333;
+            font-size: 16px;
+            padding: 8px;
+            margin-left: -8px;
+            position: absolute;
+            left: 16px;
+        }
+        .header-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+        .content {
+            margin-top: 130px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 24px 16px;
+        }
+        .status-icon {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 16px;
+        }
+        .status-text {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 12px;
+        }
+        .countdown {
+            font-size: 16px;
+            color: #653eb3;
+            font-weight: 500;
+            margin-bottom: 20px;
+        }
+        .tip-text {
+            font-size: 14px;
+            color: #666;
+            text-align: center;
+            line-height: 1.5;
+            margin-bottom: 40px;
+            padding: 0 20px;
+        }
+        .button-group {
+            display: flex;
+            gap: 16px;
+            width: 100%;
+            padding: 0 16px;
+            margin-top: 16px;
+            position: fixed;
+            bottom: 32px;
+            left: 0;
+            right: 0;
+        }
+        .back-button {
+            flex: 1;
+            padding: 14px 0;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 500;
+            text-align: center;
+            border: 1px solid #653eb3;
+            color: #653eb3;
+            background-color: white;
+            cursor: pointer;
+        }
+        .back-button:active {
+            background-color: rgba(101, 62, 179, 0.05);
+        }
+        .continue-button {
+            flex: 1;
+            padding: 14px 0;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 500;
+            text-align: center;
+            background: linear-gradient(90deg, #653eb3, #9370fa);
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .continue-button:active {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <!-- 状态栏 -->
+    <div class="status-bar">
+        <div>9:41</div>
+        <div class="flex items-center space-x-2">
+            <i class="fas fa-signal"></i>
+            <i class="fas fa-wifi"></i>
+            <i class="fas fa-battery-full"></i>
+        </div>
+    </div>
+
+    <!-- 标题栏 -->
+    <div class="header">
+        <a href="javascript:void(0)" id="backBtn" class="back-btn">
+            <i class="fas fa-chevron-left"></i>
+        </a>
+        <div class="header-title">借款申请</div>
+    </div>
+
+    <!-- 内容区域 -->
+    <div class="content">
+        <img src="images/审核中.svg" alt="审核中" class="status-icon">
+        <div class="status-text">审核中</div>
+        <div class="countdown" id="countdown">6秒后自动返回</div>
+        <div class="tip-text">正在快马加鞭审核中，审核结果以短信通知为准，请注意查收短信！</div>
+    </div>
+
+    <!-- 按钮组 -->
+    <div class="button-group">
+        <button class="back-button" id="returnBtn">返回</button>
+        <button class="continue-button" id="continueBtn">继续借款</button>
+    </div>
+
+    <script>
+        // 获取DOM元素
+        const backBtn = document.getElementById('backBtn');
+        const returnBtn = document.getElementById('returnBtn');
+        const continueBtn = document.getElementById('continueBtn');
+        const countdownEl = document.getElementById('countdown');
+        
+        // 倒计时初始值
+        let countdown = 6;
+        
+        // 更新倒计时显示
+        function updateCountdown() {
+            countdownEl.textContent = `${countdown}秒后自动返回`;
+            if (countdown <= 0) {
+                handleReturn();
+            } else {
+                countdown--;
+                setTimeout(updateCountdown, 1000);
+            }
+        }
+        
+        // 启动倒计时
+        updateCountdown();
+        
+        // 获取来源页面信息
+        function getReferer() {
+            // 获取引用页面URL，如果没有则默认为资金周转页面
+            const referer = document.referrer || '';
+            
+            // 检查是否从loan-application页面来
+            const isFromLoanApplication = referer.includes('loan-application.html');
+            
+            // 检查loan-application的前一个页面是否为当前页面
+            const isFromSelf = referer.includes('loan-complete.html');
+            
+            // 如果是从自身来的或没有引用页，则返回finance.html
+            if (isFromSelf || !referer) {
+                return 'finance.html';
+            }
+            
+            // 如果是从loan-application来的，则返回之前的页面
+            // 这里简化处理，实际应该通过localStorage等方式存储完整的导航历史
+            return isFromLoanApplication ? 'finance.html' : referer;
+        }
+        
+        // 处理返回逻辑
+        function handleReturn() {
+            window.location.href = getReferer();
+        }
+        
+        // 处理继续借款逻辑
+        function handleContinue() {
+            window.location.href = 'loan-application.html';
+        }
+        
+        // 添加事件监听
+        backBtn.addEventListener('click', handleReturn);
+        returnBtn.addEventListener('click', handleReturn);
+        continueBtn.addEventListener('click', handleContinue);
+    </script>
+</body>
+</html> 

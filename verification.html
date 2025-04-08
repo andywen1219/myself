@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>实名认证未上传证件状态</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            background-color: #f5f5f5;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .status-bar {
+            background-color: #000;
+            color: white;
+            padding: 12px 16px;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            height: 59px;
+            box-sizing: border-box;
+        }
+        .status-bar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 59px;
+            background: #000;
+            z-index: -1;
+        }
+        .header {
+            background: white;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            position: sticky;
+            top: 59px;
+            left: 0;
+            right: 0;
+            z-index: 999;
+            border-bottom: 1px solid #f0f0f0;
+            justify-content: center;
+        }
+        .back-btn {
+            color: #333;
+            font-size: 16px;
+            padding: 8px;
+            margin-left: -8px;
+            position: absolute;
+            left: 16px;
+        }
+        .header-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+        .upload-card {
+            background: white;
+            border-radius: 12px;
+            margin: 16px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+        .card-title {
+            padding: 16px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 15px;
+            font-weight: 600;
+            color: #333;
+        }
+        .card-content {
+            padding: 16px;
+            display: flex;
+            gap: 16px;
+        }
+        .upload-item {
+            margin-bottom: 0;
+            flex: 1;
+            position: relative;
+            cursor: pointer;
+        }
+        .upload-input {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+            z-index: 2;
+        }
+        .upload-svg {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 8px;
+            overflow: hidden;
+            aspect-ratio: 1.58 / 1;
+            border: 1px dashed #d1d5db;
+        }
+        .upload-svg:hover {
+            border-color: #653eb3;
+        }
+        .camera-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 48px;
+            height: 48px;
+            background: rgba(101, 62, 179, 0.2);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1;
+            pointer-events: none;
+        }
+        .camera-icon i {
+            font-size: 20px;
+            color: #653eb3;
+        }
+        .upload-label {
+            display: none; /* 隐藏标签 */
+        }
+        .upload-container {
+            width: 100%;
+            aspect-ratio: 1.58 / 1; /* 保持身份证的长宽比例 */
+            height: auto;
+            background: #f9fafb;
+            border: 1px dashed #d1d5db;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .upload-container:hover {
+            border-color: #653eb3;
+            background: #f3e8fd;
+        }
+        .upload-icon {
+            width: 40px;
+            height: 40px;
+            background: #f3e8fd;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .upload-icon i {
+            font-size: 18px;
+        }
+        .upload-text {
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+            line-height: 1.3;
+        }
+        .tips-card {
+            background: white;
+            border-radius: 12px;
+            margin: 16px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+        .tips-content {
+            padding: 16px;
+        }
+        .tip-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .tip-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .tip-item {
+            font-size: 13px;
+            color: #666;
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+        .tip-item:last-child {
+            border-bottom: none;
+        }
+        .tip-icon {
+            color: #653eb3;
+            margin-top: 2px;
+        }
+        .tip-text {
+            flex: 1;
+        }
+        .id-card-example {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 16px;
+        }
+        .example-item {
+            width: 48%;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .example-item img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        .example-label {
+            background: rgba(101, 62, 179, 0.1);
+            color: #653eb3;
+            padding: 4px 0;
+            text-align: center;
+            font-size: 12px;
+        }
+        .submit-btn {
+            background: linear-gradient(90deg, #653eb3, #9370fa);
+            color: white;
+            font-size: 16px;
+            font-weight: 500;
+            border: none;
+            border-radius: 12px;
+            padding: 14px 0;
+            width: calc(100% - 32px);
+            margin: 24px 16px;
+            display: block;
+            text-align: center;
+            cursor: pointer;
+            transition: opacity 0.2s ease;
+        }
+        .submit-btn:active {
+            opacity: 0.9;
+        }
+        .required-mark {
+            color: #dc2626;
+            margin-left: 4px;
+        }
+        /* 新增的示例网格样式 */
+        .examples-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 8px;
+        }
+        
+        .example-item {
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .example-item img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        .example-label {
+            background: rgba(101, 62, 179, 0.1);
+            color: #653eb3;
+            padding: 4px 0;
+            text-align: center;
+            font-size: 12px;
+        }
+        /* 单行示例图片布局 */
+        .examples-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            margin-top: 8px;
+            overflow-x: auto;
+            width: 100%;
+        }
+        
+        .examples-row .example-item {
+            flex: 1;
+            min-width: 22%;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: none;
+        }
+        
+        .examples-row .example-item img {
+            width: 100%;
+            height: auto;
+            display: block;
+            object-fit: contain;
+            aspect-ratio: auto;
+        }
+        
+        .example-label-light {
+            background: transparent;
+            color: #999;
+            padding: 4px 0;
+            text-align: center;
+            font-size: 11px;
+        }
+        
+        .example-text {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 2px;
+        }
+        
+        .status-icon {
+            width: 1px;
+            height: 1px;
+            margin-right: 3px;
+        }
+        /* 添加loading遮罩样式 */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease;
+        }
+        
+        .loading-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .loading-spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #653eb3;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 16px;
+        }
+        
+        .loading-text {
+            font-size: 16px;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="pb-24">
+    <!-- Loading遮罩 -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">身份信息识别中...</div>
+    </div>
+    
+    <!-- 状态栏 -->
+    <div class="status-bar">
+        <div>9:41</div>
+        <div class="flex items-center space-x-2">
+            <i class="fas fa-signal"></i>
+            <i class="fas fa-wifi"></i>
+            <i class="fas fa-battery-full"></i>
+        </div>
+    </div>
+
+    <!-- 标题栏 -->
+    <div class="header">
+        <a href="profile.html" class="back-btn">
+            <i class="fas fa-chevron-left"></i>
+        </a>
+        <div class="header-title">实名认证</div>
+    </div>
+
+    <!-- 上传区域 -->
+    <div class="upload-card">
+        <div class="card-title">上传身份证照片</div>
+        <div class="card-content">
+            <!-- 人像面上传 -->
+            <div class="upload-item">
+                <img src="images/人像面.svg" alt="身份证人像面" class="upload-svg">
+                <div class="camera-icon">
+                    <i class="fas fa-camera"></i>
+                </div>
+                <input type="file" id="frontUpload" class="upload-input" accept="image/*">
+            </div>
+            
+            <!-- 国徽面上传 -->
+            <div class="upload-item">
+                <img src="images/国徽面.svg" alt="身份证国徽面" class="upload-svg">
+                <div class="camera-icon">
+                    <i class="fas fa-camera"></i>
+                </div>
+                <input type="file" id="backUpload" class="upload-input" accept="image/*">
+            </div>
+        </div>
+    </div>
+
+    <!-- 身份证拍摄示例模块 -->
+    <div class="tips-card">
+        <div class="card-title">身份证拍摄示例</div>
+        <div class="tips-content">
+            <div class="examples-row">
+                <div class="example-item">
+                    <img src="images/标准拍摄.svg" alt="标准拍摄示例">
+                    <div class="example-label-light">标准拍摄</div>
+                </div>
+                <div class="example-item">
+                    <img src="images/边框缺失.svg" alt="边框缺失示例">
+                    <div class="example-label-light">边框缺失</div>
+                </div>
+                <div class="example-item">
+                    <img src="images/照片模糊.svg" alt="照片模糊示例">
+                    <div class="example-label-light">照片模糊</div>
+                </div>
+                <div class="example-item">
+                    <img src="images/闪光强烈.svg" alt="闪光强烈示例">
+                    <div class="example-label-light">闪光强烈</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 提示区域 -->
+    <div class="tips-card">
+        <div class="tips-content">
+            <div class="tip-title">
+                <i class="fas fa-lightbulb text-[#653eb3]"></i>
+                上传须知
+            </div>
+            <ul class="tip-list">
+                <li class="tip-item">
+                    <div class="tip-icon"><i class="fas fa-check-circle"></i></div>
+                    <div class="tip-text">请上传原件照片，不要使用复印件或扫描件</div>
+                </li>
+                <li class="tip-item">
+                    <div class="tip-icon"><i class="fas fa-check-circle"></i></div>
+                    <div class="tip-text">确保证件完整显示在画面中，不要有遮挡或裁剪</div>
+                </li>
+                <li class="tip-item">
+                    <div class="tip-icon"><i class="fas fa-check-circle"></i></div>
+                    <div class="tip-text">光线充足，照片清晰，信息可辨认</div>
+                </li>
+                <li class="tip-item">
+                    <div class="tip-icon"><i class="fas fa-check-circle"></i></div>
+                    <div class="tip-text">证件必须在有效期内，过期证件无法通过认证</div>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // 处理文件上传预览
+        document.getElementById('frontUpload').addEventListener('change', function(e) {
+            handleImageUpload(e, this.parentElement, 'front');
+        });
+        
+        document.getElementById('backUpload').addEventListener('change', function(e) {
+            handleImageUpload(e, this.parentElement, 'back');
+        });
+        
+        function handleImageUpload(event, container, side) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    // 清除原有内容
+                    while (container.firstChild) {
+                        container.removeChild(container.firstChild);
+                    }
+                    
+                    // 创建图片预览
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.style.maxWidth = '100%';
+                    img.style.maxHeight = '100%';
+                    img.style.borderRadius = '8px';
+                    
+                    // 添加重新上传按钮
+                    const reuploadBtn = document.createElement('div');
+                    reuploadBtn.className = 'absolute bottom-2 right-2 bg-[#653eb3] text-white p-2 rounded-full';
+                    reuploadBtn.innerHTML = '<i class="fas fa-sync-alt"></i>';
+                    
+                    // 保留原始input
+                    const input = event.target;
+                    
+                    // 设置容器为相对定位
+                    container.style.position = 'relative';
+                    
+                    // 添加元素到容器
+                    container.appendChild(img);
+                    container.appendChild(reuploadBtn);
+                    container.appendChild(input);
+                    
+                    // 如果是国徽面，显示loading状态并3秒后跳转
+                    if (side === 'back') {
+                        // 检查是否人像面已上传
+                        const frontImg = document.querySelector('#frontUpload').parentElement.querySelector('img:not(.upload-svg)');
+                        if (frontImg) {
+                            setTimeout(() => {
+                                // 显示loading
+                                document.getElementById('loadingOverlay').classList.add('active');
+                                
+                                // 3秒后跳转
+                                setTimeout(() => {
+                                    window.location.href = 'verification-uploaded.html';
+                                }, 3000);
+                            }, 500); // 延迟500ms显示loading，让用户先看到上传的图片
+                        }
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+    </script>
+</body>
+</html> 

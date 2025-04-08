@@ -1,0 +1,1413 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <!-- 申请借款页面 -->
+    <title>借款申请页面</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            background-color: #f5f5f5;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .status-bar {
+            background-color: #000;
+            color: white;
+            padding: 12px 16px;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            height: 59px;
+            box-sizing: border-box;
+        }
+        .status-bar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 59px;
+            background: #000;
+            z-index: -1;
+        }
+        .header {
+            background: white;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            position: sticky;
+            top: 59px;
+            left: 0;
+            right: 0;
+            z-index: 999;
+            border-bottom: 1px solid #f0f0f0;
+            justify-content: center;
+        }
+        .back-btn {
+            color: #333;
+            font-size: 16px;
+            padding: 8px;
+            margin-left: -8px;
+            position: absolute;
+            left: 16px;
+        }
+        .header-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+        .input-card {
+            background: white;
+            margin: 16px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+        .loan-amount-header {
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .loan-amount-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #333;
+        }
+        .loan-amount-hint {
+            font-size: 12px;
+            color: #999;
+        }
+        .loan-amount-input-container {
+            padding: 16px;
+            position: relative;
+        }
+        .loan-amount-input {
+            width: 100%;
+            border: none;
+            font-size: 32px;
+            font-weight: 700;
+            color: #333;
+            text-align: left;
+            padding-left: 40px;
+            outline: none;
+        }
+        .loan-amount-input:focus {
+            border-color: #653eb3;
+        }
+        .amount-prefix {
+            position: absolute;
+            left: 16px;
+            bottom: 24px;
+            font-size: 32px;
+            font-weight: 700;
+            color: #333;
+        }
+        .loan-details-section {
+            display: none; /* 初始隐藏 */
+        }
+        .loan-details-card {
+            background: white;
+            margin: 16px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+        .loan-details-title {
+            padding: 16px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .loan-details-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 16px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .loan-details-item:last-child {
+            border-bottom: none;
+        }
+        .loan-details-label {
+            font-size: 14px;
+            color: #666;
+        }
+        .loan-details-value {
+            font-size: 14px;
+            color: #333;
+            font-weight: 500;
+        }
+        .loan-details-value.text-right {
+            text-align: right;
+        }
+        .loan-agreement-card {
+            margin: 16px;
+            border-radius: 12px;
+            overflow: hidden;
+            padding: 16px 0;
+        }
+        .agreement-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 0;
+            padding: 0 16px;
+        }
+        .agreement-checkbox {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+            margin-top: 2px;
+            -webkit-appearance: none;
+            appearance: none;
+            border: 1.5px solid #d1d5db;
+            border-radius: 50%;
+            outline: none;
+            cursor: pointer;
+            position: relative;
+        }
+        .agreement-checkbox:checked {
+            background-color: #653eb3;
+            border-color: #653eb3;
+        }
+        .agreement-checkbox:checked::after {
+            content: '\2713';
+            font-size: 14px;
+            color: white;
+            position: absolute;
+            top: 0px;
+            left: 4px;
+        }
+        .agreement-text {
+            font-size: 14px;
+            color: #333;
+            flex: 1;
+        }
+        .agreement-link {
+            color: #653eb3;
+            text-decoration: none;
+        }
+        .submit-btn {
+            background: linear-gradient(90deg, #653eb3, #9370fa);
+            color: white;
+            font-size: 16px;
+            font-weight: 500;
+            border: none;
+            border-radius: 12px;
+            padding: 14px 0;
+            width: calc(100% - 32px);
+            margin: 24px 16px;
+            display: block;
+            text-align: center;
+            cursor: pointer;
+            transition: opacity 0.2s ease;
+        }
+        .submit-btn:active {
+            opacity: 0.9;
+        }
+        .submit-btn:disabled {
+            background: #d1d5db;
+            cursor: not-allowed;
+        }
+        .selectable-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 16px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+        }
+        .selectable-item:active {
+            background-color: #f9fafb;
+        }
+        .dropdown-options {
+            display: none;
+            background: white;
+            border-radius: 12px;
+            margin-top: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        .dropdown-option {
+            padding: 16px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+        }
+        .dropdown-option:last-child {
+            border-bottom: none;
+        }
+        .dropdown-option:active {
+            background-color: #f9fafb;
+        }
+        .bottom-sheet {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-radius: 20px 20px 0 0;
+            z-index: 1000;
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.33, 1, 0.68, 1);
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.12);
+        }
+        .bottom-sheet.active {
+            transform: translateY(0);
+        }
+        .sheet-drag-handle {
+            width: 36px;
+            height: 4px;
+            background-color: #e0e0e0;
+            border-radius: 2px;
+            margin: 12px auto 8px;
+        }
+        .sheet-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 16px 16px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .sheet-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+        .close-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #666;
+            background-color: #f5f5f5;
+            cursor: pointer;
+        }
+        .close-btn:active {
+            background-color: #e5e5e5;
+        }
+        .confirm-btn {
+            color: #653eb3;
+            font-weight: 500;
+            cursor: pointer;
+            padding: 6px 12px;
+            border-radius: 4px;
+        }
+        .confirm-btn:active {
+            background-color: rgba(101, 62, 179, 0.1);
+        }
+        .term-options {
+            padding: 16px 0;
+        }
+        .term-option {
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            margin: 0 8px;
+            border-radius: 12px;
+            transition: background-color 0.2s ease;
+        }
+        .term-option.selected {
+            background-color: rgba(101, 62, 179, 0.08);
+            color: #653eb3;
+            font-weight: 500;
+        }
+        .term-option:active {
+            background-color: rgba(101, 62, 179, 0.12);
+        }
+        .term-name {
+            font-size: 15px;
+        }
+        .check-icon {
+            color: #653eb3;
+            width: 22px;
+            height: 22px;
+            background-color: rgba(101, 62, 179, 0.12);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .check-icon i {
+            font-size: 12px;
+        }
+        .repayment-plan {
+            margin-top: 8px;
+            padding: 0 16px 24px;
+            display: none;
+        }
+        .repayment-plan.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .plan-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #333;
+            padding: 0 4px;
+        }
+        .plan-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 13px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+        }
+        .plan-table th {
+            background-color: #f9f9f9;
+            padding: 12px 10px;
+            text-align: left;
+            font-weight: 500;
+            color: #666;
+            border-bottom: 1px solid #eee;
+        }
+        .plan-table td {
+            padding: 14px 10px;
+            border-bottom: 1px solid #f2f2f2;
+            color: #333;
+            background-color: white;
+        }
+        .plan-table tr:last-child td {
+            border-bottom: none;
+        }
+        .backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(2px);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.25s ease;
+        }
+        .backdrop.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .repayment-method-option {
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            margin: 0 8px;
+            border-radius: 12px;
+            transition: background-color 0.2s ease;
+        }
+        .repayment-method-option.selected {
+            background-color: rgba(101, 62, 179, 0.08);
+            color: #653eb3;
+            font-weight: 500;
+        }
+        .repayment-method-option:active {
+            background-color: rgba(101, 62, 179, 0.12);
+        }
+        .term-tag-container {
+            display: flex;
+            padding: 16px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            justify-content: space-between;
+        }
+        .term-tag {
+            padding: 8px 16px;
+            border-radius: 100px;
+            font-size: 14px;
+            background-color: #f5f5f5;
+            color: #666;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex: 1;
+            text-align: center;
+            margin: 0 4px;
+        }
+        .term-tag:first-child {
+            margin-left: 0;
+        }
+        .term-tag:last-child {
+            margin-right: 0;
+        }
+        .term-tag.selected {
+            background-color: rgba(101, 62, 179, 0.12);
+            color: #653eb3;
+            font-weight: 500;
+        }
+        .repayment-list {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+        .repayment-item {
+            padding: 16px;
+            border-bottom: 1px solid #f2f2f2;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        .repayment-item:last-child {
+            border-bottom: none;
+        }
+        .repayment-left {
+            display: flex;
+            flex-direction: column;
+        }
+        .repayment-right {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+        .repayment-period {
+            font-size: 15px;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        .repayment-date {
+            font-size: 13px;
+            color: #666;
+        }
+        .repayment-amount {
+            font-size: 17px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        .repayment-detail {
+            font-size: 12px;
+            color: #999;
+            margin-top: 2px;
+        }
+        .term-info {
+            font-size: 12px;
+            color: #666;
+            margin-top: 4px;
+        }
+        .term-info.text-right {
+            text-align: right;
+        }
+        .add-account-btn {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            color: #653eb3;
+            font-size: 14px;
+            cursor: pointer;
+            margin: 0 8px;
+            border-radius: 12px;
+        }
+        .add-account-btn:active {
+            background-color: rgba(101, 62, 179, 0.08);
+        }
+        .mt-6 {
+            margin-top: 24px;
+        }
+        .mb-3 {
+            margin-bottom: 12px;
+        }
+        .continue-button:active {
+            opacity: 0.9;
+        }
+        .contract-sheet {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-radius: 20px 20px 0 0;
+            z-index: 1001;
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.33, 1, 0.68, 1);
+            max-height: 80vh;
+            overflow: hidden;
+            box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.12);
+            display: flex;
+            flex-direction: column;
+        }
+        .contract-sheet.active {
+            transform: translateY(0);
+        }
+        .contract-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .contract-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+        .contract-content {
+            padding: 16px;
+            flex: 1;
+            overflow-y: auto;
+            max-height: calc(80vh - 140px);
+            font-size: 14px;
+            line-height: 1.5;
+            color: #333;
+        }
+        .contract-footer {
+            padding: 16px;
+            border-top: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: center;
+        }
+        .confirm-read-btn {
+            width: 100%;
+            background: #d1d5db;
+            color: white;
+            font-size: 16px;
+            font-weight: 500;
+            border: none;
+            border-radius: 12px;
+            padding: 14px 0;
+            text-align: center;
+            cursor: not-allowed;
+            transition: background-color 0.2s ease;
+        }
+        .confirm-read-btn.active {
+            background: linear-gradient(90deg, #653eb3, #9370fa);
+            cursor: pointer;
+        }
+        .confirm-read-btn.active:active {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body class="pb-32">
+    <!-- 状态栏 -->
+    <div class="status-bar">
+        <div>9:41</div>
+        <div class="flex items-center space-x-2">
+            <i class="fas fa-signal"></i>
+            <i class="fas fa-wifi"></i>
+            <i class="fas fa-battery-full"></i>
+        </div>
+    </div>
+
+    <!-- 标题栏 -->
+    <div class="header">
+        <a href="javascript:void(0)" id="backButton" class="back-btn">
+            <i class="fas fa-chevron-left"></i>
+        </a>
+        <div class="header-title">借款申请</div>
+    </div>
+
+    <!-- 借款金额输入 -->
+    <div class="input-card">
+        <div class="loan-amount-header">
+            <div class="loan-amount-title">借款金额</div>
+            <div class="loan-amount-hint">单笔1000.00起借，且为100的整数倍</div>
+        </div>
+        <div class="loan-amount-input-container">
+            <span class="amount-prefix">¥</span>
+            <input type="text" class="loan-amount-input" id="loanAmount" inputmode="numeric" placeholder="请输入借款金额">
+        </div>
+    </div>
+
+    <!-- 借款要素（初始隐藏） -->
+    <div class="loan-details-section" id="loanDetailsSection">
+        <div class="loan-details-card">
+            <div class="loan-details-title">借款要素</div>
+            <!-- 还款方式 - 底部弹框 -->
+            <div class="selectable-item" id="repaymentMethodSelector">
+                <div class="loan-details-label">还款方式</div>
+                <div class="loan-details-value" id="selectedMethod">等额本金 <i class="fas fa-chevron-right text-xs ml-1 text-gray-400"></i></div>
+            </div>
+            
+            <div class="loan-details-item">
+                <div class="loan-details-label">年化利率（单利）</div>
+                <div class="loan-details-value">4.85%</div>
+            </div>
+            
+            <!-- 借款期限 - 底部弹框 -->
+            <div class="selectable-item" id="loanTermSelector">
+                <div class="loan-details-label">借款期限</div>
+                <div>
+                    <div class="loan-details-value text-right" id="selectedTerm">3个月 <i class="fas fa-chevron-right text-xs ml-1 text-gray-400"></i></div>
+                    <div class="term-info text-right" id="selectedTermInfo">首期还款：2024-06-10 · ¥3,383.18</div>
+                </div>
+            </div>
+            
+            <!-- 借款用途 - 底部弹框 -->
+            <div class="selectable-item" id="loanPurposeSelector">
+                <div class="loan-details-label">借款用途</div>
+                <div class="loan-details-value" id="selectedPurpose">支付房租 <i class="fas fa-chevron-right text-xs ml-1 text-gray-400"></i></div>
+            </div>
+            
+            <!-- 收款账户 - 底部弹框 -->
+            <div class="selectable-item" id="accountSelector">
+                <div class="loan-details-label">收款账户</div>
+                <div class="loan-details-value" id="selectedAccount">招商银行（1234） <i class="fas fa-chevron-right text-xs ml-1 text-gray-400"></i></div>
+            </div>
+        </div>
+
+        <!-- 协议签署 -->
+        <div class="agreement-item mt-6 mb-3">
+            <input type="checkbox" class="agreement-checkbox" id="agreementCheckbox">
+            <div class="agreement-text">
+                我已阅读并同意
+                <a href="#" class="agreement-link">《借款合同》</a>
+                <a href="#" class="agreement-link">《委托支付授权书》</a>
+            </div>
+        </div>
+
+        <!-- 确认借款按钮 -->
+        <button class="submit-btn" id="submitBtn" disabled>确认借款</button>
+    </div>
+
+    <!-- 还款方式底部弹框 -->
+    <div class="bottom-sheet" id="methodSheet">
+        <div class="sheet-drag-handle"></div>
+        <div class="sheet-header">
+            <div class="sheet-title">选择还款方式</div>
+            <div class="close-btn" id="closeMethodSheet">
+                <i class="fas fa-times"></i>
+            </div>
+        </div>
+        <div class="term-options">
+            <div class="repayment-method-option" data-method="等额本息">
+                <div class="flex-1">
+                    <div class="font-medium">等额本息</div>
+                    <div class="text-xs text-gray-500 mt-1">每月等额还款，前期还款压力小</div>
+                </div>
+                <div class="check-icon hidden">
+                    <i class="fas fa-check"></i>
+                </div>
+            </div>
+            <div class="repayment-method-option selected" data-method="等额本金">
+                <div class="flex-1">
+                    <div class="font-medium">等额本金</div>
+                    <div class="text-xs text-gray-500 mt-1">每月递减还款，总利息更少</div>
+                </div>
+                <div class="check-icon">
+                    <i class="fas fa-check"></i>
+                </div>
+            </div>
+            <div class="repayment-method-option" data-method="一次性还本付息">
+                <div class="flex-1">
+                    <div class="font-medium">一次性还本付息</div>
+                    <div class="text-xs text-gray-500 mt-1">到期一次性还款，适合短期周转</div>
+                </div>
+                <div class="check-icon hidden">
+                    <i class="fas fa-check"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 借款用途底部弹框 -->
+    <div class="bottom-sheet" id="purposeSheet">
+        <div class="sheet-drag-handle"></div>
+        <div class="sheet-header">
+            <div class="sheet-title">选择借款用途</div>
+            <div class="confirm-btn" id="closePurposeSheet">
+                确认
+            </div>
+        </div>
+        <div class="term-options">
+            <div class="repayment-method-option" data-purpose="客户电子（面单）">
+                <div class="flex-1">
+                    <div class="font-medium">客户电子（面单）</div>
+                </div>
+                <div class="check-icon hidden">
+                    <i class="fas fa-check"></i>
+                </div>
+            </div>
+            <div class="repayment-method-option" data-purpose="场地搬迁或改造">
+                <div class="flex-1">
+                    <div class="font-medium">场地搬迁或改造</div>
+                </div>
+                <div class="check-icon hidden">
+                    <i class="fas fa-check"></i>
+                </div>
+            </div>
+            <div class="repayment-method-option selected" data-purpose="支付房租">
+                <div class="flex-1">
+                    <div class="font-medium">支付房租</div>
+                </div>
+                <div class="check-icon">
+                    <i class="fas fa-check"></i>
+                </div>
+            </div>
+            <div class="repayment-method-option" data-purpose="支付工资">
+                <div class="flex-1">
+                    <div class="font-medium">支付工资</div>
+                </div>
+                <div class="check-icon hidden">
+                    <i class="fas fa-check"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 收款账户底部弹框 -->
+    <div class="bottom-sheet" id="accountSheet">
+        <div class="sheet-drag-handle"></div>
+        <div class="sheet-header">
+            <div class="sheet-title">选择收款账户</div>
+            <div class="confirm-btn" id="closeAccountSheet">
+                确认
+            </div>
+        </div>
+        <div class="term-options">
+            <div class="repayment-method-option selected" data-account="招商银行（1234）">
+                <div class="flex-1">
+                    <div class="font-medium">招商银行（1234）</div>
+                </div>
+                <div class="check-icon">
+                    <i class="fas fa-check"></i>
+                </div>
+            </div>
+            <div class="repayment-method-option" data-account="建设银行（5678）">
+                <div class="flex-1">
+                    <div class="font-medium">建设银行（5678）</div>
+                </div>
+                <div class="check-icon hidden">
+                    <i class="fas fa-check"></i>
+                </div>
+            </div>
+            <div class="add-account-btn">
+                <i class="fas fa-plus-circle mr-2"></i>
+                <span>添加收款账户</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 借款期限底部弹框 -->
+    <div class="backdrop" id="backdrop"></div>
+    <div class="bottom-sheet" id="termSheet">
+        <div class="sheet-drag-handle"></div>
+        <div class="sheet-header">
+            <div class="sheet-title">选择借款期限</div>
+            <div class="confirm-btn" id="closeTermSheet">
+                确认
+            </div>
+        </div>
+        
+        <!-- 期限标签 -->
+        <div class="term-tag-container">
+            <div class="term-tag" data-term="1">1个月</div>
+            <div class="term-tag selected" data-term="3">3个月</div>
+            <div class="term-tag" data-term="6">6个月</div>
+            <div class="term-tag" data-term="12">12个月</div>
+        </div>
+        
+        <!-- 还款计划（列表样式） -->
+        <div class="repayment-plan active" id="plan-3">
+            <div class="plan-title">还款计划预览</div>
+            <ul class="repayment-list">
+                <li class="repayment-item">
+                    <div class="repayment-left">
+                        <div class="repayment-period">第1期</div>
+                        <div class="repayment-date">2024-06-10</div>
+                    </div>
+                    <div class="repayment-right">
+                        <div class="repayment-amount">¥3,383.18</div>
+                        <div class="repayment-detail">本金 ¥3,300.00 · 利息 ¥83.18</div>
+                    </div>
+                </li>
+                <li class="repayment-item">
+                    <div class="repayment-left">
+                        <div class="repayment-period">第2期</div>
+                        <div class="repayment-date">2024-07-10</div>
+                    </div>
+                    <div class="repayment-right">
+                        <div class="repayment-amount">¥3,383.18</div>
+                        <div class="repayment-detail">本金 ¥3,333.33 · 利息 ¥49.85</div>
+                    </div>
+                </li>
+                <li class="repayment-item">
+                    <div class="repayment-left">
+                        <div class="repayment-period">第3期</div>
+                        <div class="repayment-date">2024-08-10</div>
+                    </div>
+                    <div class="repayment-right">
+                        <div class="repayment-amount">¥3,383.18</div>
+                        <div class="repayment-detail">本金 ¥3,366.67 · 利息 ¥16.51</div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="repayment-plan" id="plan-1">
+            <div class="plan-title">还款计划预览</div>
+            <ul class="repayment-list">
+                <li class="repayment-item">
+                    <div class="repayment-left">
+                        <div class="repayment-period">第1期</div>
+                        <div class="repayment-date">2024-06-10</div>
+                    </div>
+                    <div class="repayment-right">
+                        <div class="repayment-amount">¥10,040.42</div>
+                        <div class="repayment-detail">本金 ¥10,000.00 · 利息 ¥40.42</div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="repayment-plan" id="plan-6">
+            <div class="plan-title">还款计划预览</div>
+            <ul class="repayment-list">
+                <li class="repayment-item">
+                    <div class="repayment-left">
+                        <div class="repayment-period">第1期</div>
+                        <div class="repayment-date">2024-06-10</div>
+                    </div>
+                    <div class="repayment-right">
+                        <div class="repayment-amount">¥1,691.59</div>
+                        <div class="repayment-detail">本金 ¥1,650.00 · 利息 ¥41.59</div>
+                    </div>
+                </li>
+                <li class="repayment-item">
+                    <div class="repayment-left">
+                        <div class="repayment-period">第2期</div>
+                        <div class="repayment-date">2024-07-10</div>
+                    </div>
+                    <div class="repayment-right">
+                        <div class="repayment-amount">¥1,691.59</div>
+                        <div class="repayment-detail">本金 ¥1,662.88 · 利息 ¥28.71</div>
+                    </div>
+                </li>
+                <li class="repayment-item">
+                    <div class="repayment-left">
+                        <div class="repayment-period">中间省略...</div>
+                        <div class="repayment-date"></div>
+                    </div>
+                    <div class="repayment-right">
+                    </div>
+                </li>
+                <li class="repayment-item">
+                    <div class="repayment-left">
+                        <div class="repayment-period">第6期</div>
+                        <div class="repayment-date">2024-11-10</div>
+                    </div>
+                    <div class="repayment-right">
+                        <div class="repayment-amount">¥1,691.59</div>
+                        <div class="repayment-detail">本金 ¥1,683.34 · 利息 ¥8.25</div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="repayment-plan" id="plan-12">
+            <div class="plan-title">还款计划预览</div>
+            <ul class="repayment-list">
+                <li class="repayment-item">
+                    <div class="repayment-left">
+                        <div class="repayment-period">第1期</div>
+                        <div class="repayment-date">2024-06-10</div>
+                    </div>
+                    <div class="repayment-right">
+                        <div class="repayment-amount">¥845.80</div>
+                        <div class="repayment-detail">本金 ¥825.00 · 利息 ¥20.80</div>
+                    </div>
+                </li>
+                <li class="repayment-item">
+                    <div class="repayment-left">
+                        <div class="repayment-period">第2期</div>
+                        <div class="repayment-date">2024-07-10</div>
+                    </div>
+                    <div class="repayment-right">
+                        <div class="repayment-amount">¥845.80</div>
+                        <div class="repayment-detail">本金 ¥828.98 · 利息 ¥16.82</div>
+                    </div>
+                </li>
+                <li class="repayment-item">
+                    <div class="repayment-left">
+                        <div class="repayment-period">中间省略...</div>
+                        <div class="repayment-date"></div>
+                    </div>
+                    <div class="repayment-right">
+                    </div>
+                </li>
+                <li class="repayment-item">
+                    <div class="repayment-left">
+                        <div class="repayment-period">第12期</div>
+                        <div class="repayment-date">2025-05-10</div>
+                    </div>
+                    <div class="repayment-right">
+                        <div class="repayment-amount">¥845.80</div>
+                        <div class="repayment-detail">本金 ¥841.68 · 利息 ¥4.12</div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 借款合同阅读弹窗 -->
+    <div class="contract-sheet" id="contractSheet">
+        <div class="contract-header">
+            <div class="contract-title">借款合同</div>
+            <div class="close-btn" id="closeContractSheet">
+                <i class="fas fa-times"></i>
+            </div>
+        </div>
+        <div class="contract-content" id="contractContent">
+            <!-- 合同内容将通过JavaScript动态生成 -->
+        </div>
+        <div class="contract-footer">
+            <button class="confirm-read-btn" id="confirmReadBtn">完成阅读确认</button>
+        </div>
+    </div>
+
+    <script>
+        // 获取DOM元素
+        const loanAmount = document.getElementById('loanAmount');
+        const loanDetailsSection = document.getElementById('loanDetailsSection');
+        const agreementCheckbox = document.getElementById('agreementCheckbox');
+        const submitBtn = document.getElementById('submitBtn');
+        const backButton = document.getElementById('backButton');
+        
+        // 返回按钮点击处理
+        backButton.addEventListener('click', function() {
+            // 固定跳转到资金周转页面
+            window.location.href = 'finance.html';
+        });
+        
+        // 调试输出
+        console.log('DOM元素初始化状态:');
+        console.log('loanAmount:', loanAmount);
+        console.log('loanDetailsSection:', loanDetailsSection);
+        console.log('agreementCheckbox:', agreementCheckbox);
+        console.log('submitBtn:', submitBtn);
+        
+        // 还款方式选择器
+        const repaymentMethodSelector = document.getElementById('repaymentMethodSelector');
+        const selectedMethod = document.getElementById('selectedMethod');
+        const methodSheet = document.getElementById('methodSheet');
+        const closeMethodSheet = document.getElementById('closeMethodSheet');
+        const repaymentMethodOptions = document.querySelectorAll('.repayment-method-option');
+        
+        // 借款期限选择器
+        const loanTermSelector = document.getElementById('loanTermSelector');
+        const termSheet = document.getElementById('termSheet');
+        const backdrop = document.getElementById('backdrop');
+        const closeTermSheet = document.getElementById('closeTermSheet');
+        const termTags = document.querySelectorAll('.term-tag');
+        const selectedTerm = document.getElementById('selectedTerm');
+        const selectedTermInfo = document.getElementById('selectedTermInfo');
+        const repaymentPlans = document.querySelectorAll('.repayment-plan');
+        
+        // 借款用途选择器
+        const loanPurposeSelector = document.getElementById('loanPurposeSelector');
+        const selectedPurpose = document.getElementById('selectedPurpose');
+        const purposeSheet = document.getElementById('purposeSheet');
+        const closePurposeSheet = document.getElementById('closePurposeSheet');
+        const purposeOptions = document.querySelectorAll('#purposeSheet .repayment-method-option');
+        
+        // 收款账户选择器
+        const accountSelector = document.getElementById('accountSelector');
+        const selectedAccount = document.getElementById('selectedAccount');
+        const accountSheet = document.getElementById('accountSheet');
+        const closeAccountSheet = document.getElementById('closeAccountSheet');
+        const accountOptions = document.querySelectorAll('#accountSheet .repayment-method-option');
+        const addAccountBtn = document.querySelector('.add-account-btn');
+
+        // 处理输入框失焦事件
+        loanAmount.addEventListener('blur', function() {
+            const value = this.value.trim();
+            if (value) {
+                // 格式化输入值
+                const numValue = parseInt(value.replace(/[^\d]/g, ''));
+                
+                // 检查是否符合要求（≥1000且是100的倍数）
+                if (numValue >= 1000 && numValue % 100 === 0) {
+                    // 格式化显示
+                    this.value = numValue.toLocaleString('zh-CN');
+                    // 显示其他内容
+                    loanDetailsSection.style.display = 'block';
+                    console.log('显示借款要素区域');
+                } else {
+                    alert('借款金额必须≥1000且是100的倍数');
+                    loanDetailsSection.style.display = 'none';
+                }
+            } else {
+                // 如果没有输入，隐藏其他内容
+                loanDetailsSection.style.display = 'none';
+            }
+        });
+
+        // 处理输入框输入事件
+        loanAmount.addEventListener('input', function() {
+            // 只允许输入数字
+            this.value = this.value.replace(/[^\d]/g, '');
+        });
+
+        // 处理协议勾选事件
+        agreementCheckbox.addEventListener('change', function() {
+            submitBtn.disabled = !this.checked;
+        });
+
+        // 处理提交按钮点击事件
+        submitBtn.addEventListener('click', function() {
+            if (!agreementCheckbox.checked) {
+                alert('请先阅读并同意相关协议');
+                return;
+            }
+            
+            const value = loanAmount.value.trim().replace(/[^\d]/g, '');
+            if (!value || parseInt(value) < 1000 || parseInt(value) % 100 !== 0) {
+                alert('请输入有效的借款金额');
+                return;
+            }
+            
+            // 显示借款合同弹窗
+            showContractSheet();
+        });
+        
+        // 还款方式选择器点击事件
+        repaymentMethodSelector.addEventListener('click', function() {
+            backdrop.classList.add('active');
+            methodSheet.classList.add('active');
+        });
+        
+        // 关闭还款方式选择
+        closeMethodSheet.addEventListener('click', function() {
+            backdrop.classList.remove('active');
+            methodSheet.classList.remove('active');
+        });
+        
+        // 选择还款方式
+        repaymentMethodOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                const method = this.getAttribute('data-method');
+                
+                // 更新选中状态
+                repaymentMethodOptions.forEach(opt => {
+                    opt.classList.remove('selected');
+                    opt.querySelector('.check-icon').classList.add('hidden');
+                });
+                this.classList.add('selected');
+                this.querySelector('.check-icon').classList.remove('hidden');
+                
+                // 更新显示
+                selectedMethod.innerHTML = method + ' <i class="fas fa-chevron-right text-xs ml-1 text-gray-400"></i>';
+                
+                // 关闭弹框
+                backdrop.classList.remove('active');
+                methodSheet.classList.remove('active');
+            });
+        });
+        
+        // 借款期限选择器点击事件
+        loanTermSelector.addEventListener('click', function() {
+            backdrop.classList.add('active');
+            termSheet.classList.add('active');
+        });
+        
+        // 关闭借款期限选择
+        closeTermSheet.addEventListener('click', function() {
+            backdrop.classList.remove('active');
+            termSheet.classList.remove('active');
+        });
+        
+        // 点击背景关闭弹框
+        backdrop.addEventListener('click', function() {
+            backdrop.classList.remove('active');
+            termSheet.classList.remove('active');
+            methodSheet.classList.remove('active');
+            purposeSheet.classList.remove('active');
+            accountSheet.classList.remove('active');
+        });
+        
+        // 获取还款信息
+        function getRepaymentInfo(term) {
+            const infoMap = {
+                '1': {date: '2024-06-10', amount: '¥10,040.42'},
+                '3': {date: '2024-06-10', amount: '¥3,383.18'},
+                '6': {date: '2024-06-10', amount: '¥1,691.59'},
+                '12': {date: '2024-06-10', amount: '¥845.80'}
+            };
+            return infoMap[term];
+        }
+        
+        // 选择借款期限
+        termTags.forEach(tag => {
+            tag.addEventListener('click', function() {
+                const term = this.getAttribute('data-term');
+                
+                // 更新选中状态
+                termTags.forEach(t => t.classList.remove('selected'));
+                this.classList.add('selected');
+                
+                // 更新显示
+                selectedTerm.innerHTML = term + '个月 <i class="fas fa-chevron-right text-xs ml-1 text-gray-400"></i>';
+                
+                // 更新还款信息
+                const info = getRepaymentInfo(term);
+                selectedTermInfo.textContent = `首期还款：${info.date} · ${info.amount}`;
+                
+                // 显示对应的还款计划
+                repaymentPlans.forEach(plan => plan.classList.remove('active'));
+                document.getElementById('plan-' + term).classList.add('active');
+            });
+        });
+        
+        // 借款用途选择器点击事件
+        loanPurposeSelector.addEventListener('click', function() {
+            backdrop.classList.add('active');
+            purposeSheet.classList.add('active');
+        });
+        
+        // 关闭借款用途选择
+        closePurposeSheet.addEventListener('click', function() {
+            backdrop.classList.remove('active');
+            purposeSheet.classList.remove('active');
+        });
+        
+        // 选择借款用途
+        purposeOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                const purpose = this.getAttribute('data-purpose');
+                
+                // 更新选中状态
+                purposeOptions.forEach(opt => {
+                    opt.classList.remove('selected');
+                    opt.querySelector('.check-icon').classList.add('hidden');
+                });
+                this.classList.add('selected');
+                this.querySelector('.check-icon').classList.remove('hidden');
+                
+                // 更新显示
+                selectedPurpose.innerHTML = purpose + ' <i class="fas fa-chevron-right text-xs ml-1 text-gray-400"></i>';
+            });
+        });
+        
+        // 收款账户选择器点击事件
+        accountSelector.addEventListener('click', function() {
+            backdrop.classList.add('active');
+            accountSheet.classList.add('active');
+        });
+        
+        // 关闭收款账户选择
+        closeAccountSheet.addEventListener('click', function() {
+            backdrop.classList.remove('active');
+            accountSheet.classList.remove('active');
+        });
+        
+        // 选择收款账户
+        accountOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                const account = this.getAttribute('data-account');
+                
+                // 更新选中状态
+                accountOptions.forEach(opt => {
+                    opt.classList.remove('selected');
+                    opt.querySelector('.check-icon').classList.add('hidden');
+                });
+                this.classList.add('selected');
+                this.querySelector('.check-icon').classList.remove('hidden');
+                
+                // 更新显示
+                selectedAccount.innerHTML = account + ' <i class="fas fa-chevron-right text-xs ml-1 text-gray-400"></i>';
+            });
+        });
+        
+        // 添加账户点击事件
+        addAccountBtn.addEventListener('click', function() {
+            alert('跳转到添加账户页面');
+            // 在实际应用中，这里应该跳转到添加账户的页面
+        });
+
+        // 申请按钮点击事件
+        const enterpriseApplyBtn = document.getElementById('enterprise-apply-btn');
+        const personalApplyBtn = document.getElementById('personal-apply-btn');
+        
+        // 如果按钮存在才添加事件监听器
+        if (enterpriseApplyBtn) {
+            enterpriseApplyBtn.addEventListener('click', () => {
+                window.location.href = 'loan-application.html';
+            });
+        }
+        
+        if (personalApplyBtn) {
+            personalApplyBtn.addEventListener('click', () => {
+                window.location.href = 'loan-application.html';
+            });
+        }
+
+        // 借款合同弹窗相关
+        const contractSheet = document.getElementById('contractSheet');
+        const contractContent = document.getElementById('contractContent');
+        const closeContractSheet = document.getElementById('closeContractSheet');
+        const confirmReadBtn = document.getElementById('confirmReadBtn');
+        
+        // 生成随机合同文本
+        function generateRandomContract() {
+            const paragraphs = [
+                "第一条 借款金额、期限和用途",
+                "1.1 借款金额：人民币" + loanAmount.value + "元（大写：" + convertToChinese(loanAmount.value.replace(/[^\d]/g, '')) + "元整）。",
+                "1.2 借款期限：自本合同生效之日起，至" + getRepaymentEndDate(document.getElementById('selectedTerm').textContent.trim().split('个')[0]) + "止。",
+                "1.3 借款用途：" + document.getElementById('selectedPurpose').textContent.trim().split(' ')[0] + "。借款人不得将借款用于其他用途。",
+                
+                "第二条 借款利率和计息方式",
+                "2.1 借款利率：本合同项下的借款利率为年利率4.85%（单利）。",
+                "2.2 计息方式：按照实际用款天数计算利息，计息公式为：利息=本金×年利率×实际用款天数÷360。",
+                "2.3 还款方式：" + document.getElementById('selectedMethod').textContent.trim().split(' ')[0] + "。",
+                
+                "第三条 还款方式",
+                "3.1 还款日期：借款人应按照约定的还款方式和期限归还贷款本息。",
+                "3.2 提前还款：借款人可提前归还全部或部分借款，提前还款应提前3个工作日通知贷款人。",
+                
+                "第四条 违约责任",
+                "4.1 借款人未按本合同约定日期归还借款本息的，贷款人有权对逾期部分按借款利率上浮50%计收罚息。",
+                "4.2 借款人未按约定用途使用借款的，贷款人有权对挪用部分按借款利率上浮100%计收罚息。",
+                
+                "第五条 合同生效及其他",
+                "5.1 本合同自借款人点击\"完成阅读确认\"之日起生效。",
+                "5.2 本合同采用电子形式订立，借款人通过点击确认的方式表示同意接受本合同全部条款。",
+                "5.3 本合同受中华人民共和国法律管辖并按其解释。",
+                
+                "附则",
+                "如有未尽事宜，可由贷款人和借款人双方协商解决。"
+            ];
+            
+            // 附加大量随机文本段落，确保需要滚动才能看完
+            for (let i = 0; i < 20; i++) {
+                paragraphs.push("随机条款 " + (i + 1) + "：本条款是自动生成的随机文本，用于确保合同长度足够，需要借款人完全滚动查看才能确认阅读完毕。借款人应当仔细阅读本合同所有条款，充分理解合同内容，对合同条款有疑问的应当向贷款人咨询。借款人签署本合同即表示其已经阅读并完全理解和接受本合同的全部条款。");
+            }
+            
+            return paragraphs.join("\n\n");
+        }
+        
+        // 数字转中文金额
+        function convertToChinese(num) {
+            if (isNaN(num)) return "数值错误";
+            
+            const cnNums = ['零', '壹', '贰', '叁', '肆', '伍', '陆', '柒', '捌', '玖'];
+            const cnIntRadice = ['', '拾', '佰', '仟'];
+            const cnIntUnits = ['', '万', '亿', '兆'];
+            
+            let integerNum = parseInt(num);
+            let chineseStr = '';
+            
+            if (integerNum === 0) {
+                return cnNums[0];
+            }
+            
+            let count = 0;
+            while (integerNum > 0) {
+                let section = integerNum % 10000;
+                if (section !== 0) {
+                    let sectionStr = sectionToChinese(section, cnNums, cnIntRadice);
+                    chineseStr = sectionStr + (section === 0 ? '' : cnIntUnits[count]) + chineseStr;
+                }
+                integerNum = Math.floor(integerNum / 10000);
+                count++;
+            }
+            
+            return chineseStr;
+        }
+        
+        function sectionToChinese(section, cnNums, cnIntRadice) {
+            let strIns = '';
+            let chnStr = '';
+            let zero = true;
+            let count = 0;
+            
+            while (section > 0) {
+                let v = section % 10;
+                if (v === 0) {
+                    if (!zero) {
+                        zero = true;
+                        chnStr = cnNums[v] + chnStr;
+                    }
+                } else {
+                    zero = false;
+                    strIns = cnNums[v];
+                    strIns += cnIntRadice[count];
+                    chnStr = strIns + chnStr;
+                }
+                count++;
+                section = Math.floor(section / 10);
+            }
+            
+            return chnStr;
+        }
+        
+        // 获取还款结束日期
+        function getRepaymentEndDate(months) {
+            const date = new Date();
+            date.setMonth(date.getMonth() + parseInt(months));
+            return date.getFullYear() + '年' + (date.getMonth() + 1) + '月' + date.getDate() + '日';
+        }
+        
+        // 显示合同弹窗
+        function showContractSheet() {
+            // 生成合同内容
+            contractContent.textContent = generateRandomContract();
+            
+            // 重置按钮状态
+            confirmReadBtn.classList.remove('active');
+            confirmReadBtn.disabled = true;
+            
+            // 显示背景遮罩和弹窗
+            backdrop.classList.add('active');
+            contractSheet.classList.add('active');
+            
+            // 监听合同内容滚动事件
+            contractContent.addEventListener('scroll', checkScrollEnd);
+        }
+        
+        // 检查是否滚动到底部
+        function checkScrollEnd() {
+            const scrollTop = contractContent.scrollTop;
+            const scrollHeight = contractContent.scrollHeight;
+            const clientHeight = contractContent.clientHeight;
+            
+            // 当滚动到距离底部20px以内时，视为已读完
+            if (scrollHeight - scrollTop - clientHeight < 20) {
+                confirmReadBtn.classList.add('active');
+                confirmReadBtn.disabled = false;
+                
+                // 移除滚动监听
+                contractContent.removeEventListener('scroll', checkScrollEnd);
+            }
+        }
+        
+        // 关闭合同弹窗
+        closeContractSheet.addEventListener('click', function() {
+            backdrop.classList.remove('active');
+            contractSheet.classList.remove('active');
+        });
+        
+        // 确认阅读按钮事件
+        confirmReadBtn.addEventListener('click', function() {
+            if (!this.classList.contains('active')) {
+                return;
+            }
+            
+            // 跳转到借款完成页面
+            window.location.href = 'loan-complete.html';
+        });
+    </script>
+</body>
+</html> 
