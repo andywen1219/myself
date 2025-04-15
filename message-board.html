@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>留言板</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            background-color: #f5f5f5;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .status-bar {
+            background-color: #000;
+            color: white;
+            padding: 12px 16px;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            height: 59px;
+            box-sizing: border-box;
+        }
+        
+        .status-bar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 59px;
+            background: #000;
+            z-index: -1;
+        }
+        
+        .header {
+            background: white;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            position: sticky;
+            top: 59px;
+            left: 0;
+            right: 0;
+            z-index: 999;
+            border-bottom: 1px solid #f0f0f0;
+            justify-content: center;
+        }
+        
+        .back-btn {
+            color: #333;
+            font-size: 16px;
+            padding: 8px;
+            margin-left: -8px;
+            position: absolute;
+            left: 16px;
+        }
+        
+        .header-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 16px auto;
+            padding: 0 16px;
+        }
+        
+        .message-form {
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+        
+        .form-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .form-title i {
+            color: #653eb3;
+        }
+        
+        .form-group {
+            margin-bottom: 16px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            font-size: 14px;
+            color: #333;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #653eb3;
+            box-shadow: 0 0 0 3px rgba(101, 62, 179, 0.1);
+        }
+        
+        textarea {
+            height: 120px;
+            resize: vertical;
+        }
+        
+        .btn {
+            background-color: #653eb3;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 8px;
+            cursor: pointer;
+            display: block;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            background-color: #5935a0;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(101, 62, 179, 0.3);
+        }
+
+        .attachment-area {
+            border: 1px dashed #d1d5db;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+            transition: all 0.2s;
+            background-color: #f9fafb;
+        }
+
+        .attachment-area:hover, .attachment-area.dragover {
+            border-color: #653eb3;
+            background-color: #f3e8fd;
+        }
+
+        .attachment-label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .attachment-icon {
+            font-size: 24px;
+            color: #653eb3;
+        }
+
+        .attachment-text {
+            font-size: 14px;
+            color: #6b7280;
+            text-align: center;
+        }
+
+        .attachment-hint {
+            font-size: 12px;
+            color: #9ca3af;
+            text-align: center;
+            margin-top: 4px;
+        }
+
+        .attachment-input {
+            display: none;
+        }
+
+        .attachment-preview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .attachment-item {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .attachment-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .attachment-item .file-icon {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f3f4f6;
+            font-size: 24px;
+            color: #6b7280;
+        }
+
+        .attachment-item .file-name {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: rgba(0, 0, 0, 0.6);
+            color: white;
+            font-size: 10px;
+            padding: 2px 4px;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .attachment-item .remove-button {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: rgba(220, 38, 38, 0.8);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            cursor: pointer;
+        }
+        
+        .message-list {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            padding: 20px;
+        }
+        
+        .message-list-header {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .message-list-header i {
+            color: #16a34a;
+        }
+        
+        .message {
+            background-color: #f9f9f9;
+            border-left: 4px solid #653eb3;
+            padding: 16px;
+            margin-bottom: 16px;
+            border-radius: 8px;
+        }
+        
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .message-name {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .message-time {
+            color: #999;
+            font-size: 12px;
+        }
+        
+        .message-content {
+            line-height: 1.5;
+            font-size: 14px;
+            color: #333;
+        }
+        
+        .message-type {
+            display: inline-block;
+            padding: 2px 8px;
+            font-size: 12px;
+            border-radius: 4px;
+            background-color: #f3e8fd;
+            color: #653eb3;
+            margin-left: 8px;
+        }
+        
+        .message-type.建议 {
+            background-color: #f3e8fd;
+            color: #653eb3;
+        }
+        
+        .message-type.问题 {
+            background-color: #fee2e2;
+            color: #dc2626;
+        }
+        
+        .message-type.投诉 {
+            background-color: #fef3c7;
+            color: #ca8a04;
+        }
+        
+        .message-type.其他 {
+            background-color: #dcfce7;
+            color: #16a34a;
+        }
+        
+        .error {
+            color: #dc2626;
+            font-size: 12px;
+            margin-top: 4px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+        
+        .empty-state i {
+            font-size: 48px;
+            color: #ccc;
+            margin-bottom: 16px;
+        }
+        
+        .empty-state-text {
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 0 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 状态栏 -->
+    <div class="status-bar">
+        <div>9:41</div>
+        <div class="flex items-center space-x-2">
+            <i class="fas fa-signal"></i>
+            <i class="fas fa-wifi"></i>
+            <i class="fas fa-battery-full"></i>
+        </div>
+    </div>
+
+    <!-- 标题栏 -->
+    <div class="header">
+        <a href="message-list.html" class="back-btn">
+            <i class="fas fa-chevron-left"></i>
+        </a>
+        <div class="header-title">留言板</div>
+    </div>
+
+    <div class="container">
+        <!-- 留言表单 -->
+        <div class="message-form">
+            <form id="message-form">
+                <div class="form-group">
+                    <label for="type">留言类型</label>
+                    <select id="type">
+                        <option value="建议">建议</option>
+                        <option value="投诉反馈">投诉反馈</option>
+                        <option value="问题咨询">问题咨询</option>
+                        <option value="其他">其他</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="message">留言内容</label>
+                    <textarea id="message" placeholder="请输入您的留言内容" required></textarea>
+                    <div class="error" id="message-error"></div>
+                </div>
+                
+                <!-- 附件上传区域 -->
+                <div class="form-group">
+                    <label>上传附件</label>
+                    <div class="attachment-area" id="attachment-area">
+                        <label for="attachment-input" class="attachment-label">
+                            <span class="attachment-icon"><i class="fas fa-cloud-upload-alt"></i></span>
+                            <span class="attachment-text">点击上传</span>
+                            <span class="attachment-hint">支持图片、文档、PDF等格式，单个文件不超过5MB</span>
+                        </label>
+                        <input type="file" id="attachment-input" class="attachment-input" multiple>
+                        <div class="attachment-preview" id="attachment-preview"></div>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn">提交留言</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 获取DOM元素
+            const messageForm = document.getElementById('message-form');
+            const typeSelect = document.getElementById('type');
+            const messageInput = document.getElementById('message');
+            const messageError = document.getElementById('message-error');
+            const attachmentArea = document.getElementById('attachment-area');
+            const attachmentInput = document.getElementById('attachment-input');
+            const attachmentPreview = document.getElementById('attachment-preview');
+            
+            // 存储附件文件
+            let attachmentFiles = [];
+            
+            // 处理附件拖放
+            attachmentArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.classList.add('dragover');
+            });
+            
+            attachmentArea.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                this.classList.remove('dragover');
+            });
+            
+            attachmentArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.classList.remove('dragover');
+                
+                const files = e.dataTransfer.files;
+                handleFiles(files);
+            });
+            
+            // 处理文件选择
+            attachmentInput.addEventListener('change', function() {
+                handleFiles(this.files);
+            });
+            
+            // 处理文件上传
+            function handleFiles(files) {
+                // 处理每个文件
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    
+                    // 限制文件大小
+                    if (file.size > 5 * 1024 * 1024) {
+                        alert(`文件 ${file.name} 超过5MB，无法上传`);
+                        continue;
+                    }
+                    
+                    // 添加到附件列表
+                    attachmentFiles.push(file);
+                    
+                    // 显示预览
+                    const attachmentItem = document.createElement('div');
+                    attachmentItem.className = 'attachment-item';
+                    
+                    // 根据文件类型显示不同的预览
+                    if (file.type.startsWith('image/')) {
+                        // 图片预览
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            attachmentItem.innerHTML = `
+                                <img src="${e.target.result}" alt="${file.name}">
+                                <div class="file-name">${truncateFileName(file.name)}</div>
+                                <div class="remove-button" data-index="${attachmentFiles.length - 1}">
+                                    <i class="fas fa-times"></i>
+                                </div>
+                            `;
+                        };
+                        reader.readAsDataURL(file);
+                    } else {
+                        // 其他文件类型
+                        let fileIcon = 'fa-file';
+                        
+                        // 根据文件扩展名设置图标
+                        const extension = file.name.split('.').pop().toLowerCase();
+                        if (['pdf'].includes(extension)) {
+                            fileIcon = 'fa-file-pdf';
+                        } else if (['doc', 'docx'].includes(extension)) {
+                            fileIcon = 'fa-file-word';
+                        } else if (['xls', 'xlsx'].includes(extension)) {
+                            fileIcon = 'fa-file-excel';
+                        } else if (['ppt', 'pptx'].includes(extension)) {
+                            fileIcon = 'fa-file-powerpoint';
+                        } else if (['zip', 'rar', '7z'].includes(extension)) {
+                            fileIcon = 'fa-file-archive';
+                        } else if (['txt', 'log'].includes(extension)) {
+                            fileIcon = 'fa-file-alt';
+                        }
+                        
+                        attachmentItem.innerHTML = `
+                            <div class="file-icon">
+                                <i class="fas ${fileIcon}"></i>
+                            </div>
+                            <div class="file-name">${truncateFileName(file.name)}</div>
+                            <div class="remove-button" data-index="${attachmentFiles.length - 1}">
+                                <i class="fas fa-times"></i>
+                            </div>
+                        `;
+                    }
+                    
+                    attachmentPreview.appendChild(attachmentItem);
+                }
+                
+                // 添加事件监听器到移除按钮
+                const removeButtons = document.querySelectorAll('.remove-button');
+                removeButtons.forEach(button => {
+                    button.addEventListener('click', function() {
+                        const index = parseInt(this.getAttribute('data-index'));
+                        removeAttachment(index);
+                    });
+                });
+                
+                // 清空file input，以便可以重复上传同一个文件
+                attachmentInput.value = '';
+            }
+            
+            // 移除附件
+            function removeAttachment(index) {
+                // 从附件数组中移除
+                attachmentFiles.splice(index, 1);
+                
+                // 重新渲染预览
+                attachmentPreview.innerHTML = '';
+                
+                attachmentFiles.forEach((file, i) => {
+                    const attachmentItem = document.createElement('div');
+                    attachmentItem.className = 'attachment-item';
+                    
+                    if (file.type.startsWith('image/')) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            attachmentItem.innerHTML = `
+                                <img src="${e.target.result}" alt="${file.name}">
+                                <div class="file-name">${truncateFileName(file.name)}</div>
+                                <div class="remove-button" data-index="${i}">
+                                    <i class="fas fa-times"></i>
+                                </div>
+                            `;
+                        };
+                        reader.readAsDataURL(file);
+                    } else {
+                        let fileIcon = 'fa-file';
+                        const extension = file.name.split('.').pop().toLowerCase();
+                        if (['pdf'].includes(extension)) {
+                            fileIcon = 'fa-file-pdf';
+                        } else if (['doc', 'docx'].includes(extension)) {
+                            fileIcon = 'fa-file-word';
+                        } else if (['xls', 'xlsx'].includes(extension)) {
+                            fileIcon = 'fa-file-excel';
+                        } else if (['ppt', 'pptx'].includes(extension)) {
+                            fileIcon = 'fa-file-powerpoint';
+                        } else if (['zip', 'rar', '7z'].includes(extension)) {
+                            fileIcon = 'fa-file-archive';
+                        } else if (['txt', 'log'].includes(extension)) {
+                            fileIcon = 'fa-file-alt';
+                        }
+                        
+                        attachmentItem.innerHTML = `
+                            <div class="file-icon">
+                                <i class="fas ${fileIcon}"></i>
+                            </div>
+                            <div class="file-name">${truncateFileName(file.name)}</div>
+                            <div class="remove-button" data-index="${i}">
+                                <i class="fas fa-times"></i>
+                            </div>
+                        `;
+                    }
+                    
+                    attachmentPreview.appendChild(attachmentItem);
+                });
+                
+                // 重新绑定移除按钮事件
+                const removeButtons = document.querySelectorAll('.remove-button');
+                removeButtons.forEach(button => {
+                    button.addEventListener('click', function() {
+                        const index = parseInt(this.getAttribute('data-index'));
+                        removeAttachment(index);
+                    });
+                });
+            }
+            
+            // 截断文件名
+            function truncateFileName(name) {
+                if (name.length <= 10) return name;
+                
+                const extension = name.split('.').pop();
+                const baseName = name.substring(0, name.length - extension.length - 1);
+                
+                if (baseName.length <= 6) return name;
+                
+                return baseName.substring(0, 6) + '...' + '.' + extension;
+            }
+            
+            // 提交表单
+            messageForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // 重置错误信息
+                messageError.textContent = '';
+                
+                // 获取表单数据
+                const type = typeSelect.value;
+                const message = messageInput.value.trim();
+                
+                // 表单验证
+                let isValid = true;
+                
+                if (message === '') {
+                    messageError.textContent = '请输入留言内容';
+                    isValid = false;
+                }
+                
+                if (!isValid) {
+                    return;
+                }
+                
+                // 创建FormData对象
+                const formData = new FormData();
+                formData.append('type', type);
+                formData.append('message', message);
+                
+                // 添加附件
+                attachmentFiles.forEach((file, index) => {
+                    formData.append(`attachment_${index}`, file);
+                });
+                
+                // 在实际项目中，这里应该发送AJAX请求到服务器
+                console.log('表单数据:', {
+                    type,
+                    message,
+                    attachments: attachmentFiles
+                });
+                
+                // 模拟提交成功
+                alert('留言提交成功！');
+                
+                // 重置表单
+                messageForm.reset();
+                attachmentFiles = [];
+                attachmentPreview.innerHTML = '';
+                
+                // 重定向到留言列表页面
+                // window.location.href = 'message-list.html';
+            });
+        });
+    </script>
+</body>
+</html> 

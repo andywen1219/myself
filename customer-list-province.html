@@ -319,13 +319,21 @@
         <div class="filter-row">
             <div class="filter-item">
                 <select class="filter-input">
-                    <option value="">上海区</option>
-                    <option value="zhejiang_south">江苏省区</option>
-                    <option value="zhejiang_north">浙江省区</option>
-                    <option value="jiangsu">安徽省区</option>
-                    <option value="jiangsu">福建省区</option>
-                    <option value="jiangsu">江西省区</option>
-                    <option value="jiangsu">山东省区</option>
+                    <option value="">嘉定网格区</option>
+                    <option value="zhejiang_south">青浦网格区</option>
+                    <option value="zhejiang_north">黄浦网格区</option>
+                    <option value="jiangsu">浦东网格区</option>
+                    <option value="jiangsu">长宁网格区</option>
+                    <option value="jiangsu">普陀网格区</option>
+                    <option value="jiangsu">徐汇网格区</option>
+                    <option value="jiangsu">静安网格区</option>
+                    <option value="jiangsu">宝山网格区</option>
+                    <option value="jiangsu">闵行网格区</option>
+                    <option value="jiangsu">松江网格区</option>
+                    <option value="jiangsu">金山网格区</option>
+                    <option value="jiangsu">奉贤网格区</option>
+                    <option value="jiangsu">崇明网格区</option>
+                    <option value="jiangsu">其他</option>
                 </select>
             </div>
             <div class="filter-item">
@@ -352,23 +360,23 @@
                 <tr onclick="window.location.href='customer-detail.html'" style="cursor: pointer">
                     <td>552001</td>
                     <td class="amount">¥500,000</td>
-                    <td>安徽省新淮北市</td>
-                    <td>天津上东货运代理有限公司</td>
+                    <td>上海市闵行区西郊</td>
+                    <td>上海上东货运代理有限公司</td>
                     <td class="amount">¥1,000,000</td>
                     <td class="remaining">¥500,000</td>
                 </tr>
                 <tr onclick="window.location.href='customer-detail.html'" style="cursor: pointer">
                     <td>552002</td>
                     <td class="amount">¥300,000</td>
-                    <td>安徽省宿州市砀山县</td>
-                    <td>佛山成涛物流有限公司</td>
+                    <td>上海市崇明区东部</td>
+                    <td>上海成涛物流有限公司</td>
                     <td class="amount">¥800,000</td>
                     <td class="remaining">¥500,000</td>
                 </tr>
                 <tr onclick="window.location.href='customer-detail.html'" style="cursor: pointer">
                     <td>552003</td>
                     <td class="amount">¥200,000</td>
-                    <td>安徽省蚌埠市</td>
+                    <td>上海市普陀区中远城</td>
                     <td>上海顶浪货运代理有限公司</td>
                     <td class="amount">¥600,000</td>
                     <td class="remaining">¥400,000</td>
@@ -376,16 +384,16 @@
                 <tr onclick="window.location.href='customer-detail.html'" style="cursor: pointer">
                     <td>552004</td>
                     <td class="amount">¥400,000</td>
-                    <td>安徽省合肥市瑶海区御景湾</td>
-                    <td>南宁市松圆商贸有限公司</td>
+                    <td>上海市浦东新区东昌绿地</td>
+                    <td>上海市松圆商贸有限公司</td>
                     <td class="amount">¥1,200,000</td>
                     <td class="remaining">¥800,000</td>
                 </tr>
                 <tr onclick="window.location.href='customer-detail.html'" style="cursor: pointer">
                     <td>552005</td>
                     <td class="amount">¥250,000</td>
-                    <td>安徽省蚌埠市蚌山区</td>
-                    <td>西安常兴速递服务有限公司</td>
+                    <td>上海市浦东新区繁荣</td>
+                    <td>上海市常兴速递服务有限公司</td>
                     <td class="amount">¥700,000</td>
                     <td class="remaining">¥450,000</td>
                 </tr>
@@ -399,9 +407,9 @@
         new Chart(distributionCtx, {
             type: 'doughnut',
             data: {
-                labels: ['山东省区', '江西省区', '上海区', '江苏省区', '浙江省区', '江西省区'],
+                labels: ['浦东新网格区', '长宁网格区', '普陀网格区', '闵行网格区', '金山网格区', '其他'],
                 datasets: [{
-                    data: [7, 3, 30, 30, 25, 5],
+                    data: [1, 10, 50, 20, 17, 2],
                     backgroundColor: [
                         '#653eb3',
                         '#2563eb',
@@ -422,7 +430,7 @@
                 },
                 onClick: function(event, elements) {
                     if (elements.length > 0) {
-                        window.location.href = 'customer-list-province.html';
+                        window.location.href = 'customer-list-area.html';
                     }
                 }
             }

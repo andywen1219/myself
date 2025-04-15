@@ -233,7 +233,7 @@
 
     <!-- 标题栏 -->
     <div class="header">
-        <a href="profile.html" class="back-btn">
+        <a href="javascript:void(0);" class="back-btn" onclick="handleBack()">
             <i class="fas fa-chevron-left"></i>
         </a>
         <div class="header-title">我的借款</div>
@@ -263,7 +263,7 @@
                 <div class="loan-amount">¥500,000</div>
                 <div class="progress-bar">
                     <div class="progress-bar-fill" style="width: 40%">
-                        <div class="progress-value">已还 40%</div>
+                        <div class="progress-value">已还 6期</div>
                     </div>
                 </div>
                 <div class="loan-info">
@@ -289,7 +289,7 @@
                 <div class="loan-amount">¥300,000</div>
                 <div class="progress-bar">
                     <div class="progress-bar-fill" style="width: 25%">
-                        <div class="progress-value">已还 25%</div>
+                        <div class="progress-value">已还 3期</div>
                     </div>
                 </div>
                 <div class="loan-info">
@@ -333,7 +333,7 @@
                 <div class="loan-amount">¥200,000</div>
                 <div class="progress-bar">
                     <div class="progress-bar-fill" style="width: 15%">
-                        <div class="progress-value">已还 15%</div>
+                        <div class="progress-value">已还 2期</div>
                     </div>
                 </div>
                 <div class="loan-info">
@@ -355,6 +355,20 @@
     </div>
 
     <script>
+        function handleBack() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const fromPage = urlParams.get('from');
+            
+            if (fromPage === 'loan-detail') {
+                window.location.href = 'profile.html';
+            } else if (fromPage === 'home') {
+                window.location.href = 'home.html';
+            } else {
+                // 默认返回到个人中心页面
+                window.location.href = document.referrer || 'profile.html';
+            }
+        }
+
         function toggleSection(header) {
             const toggle = header.querySelector('.section-toggle');
             const list = header.nextElementSibling;
@@ -364,8 +378,8 @@
         }
 
         function goToLoanDetail(loanId) {
-            // 跳转到借据详情页
-            window.location.href = `loan-detail.html?id=${loanId}`;
+            // 跳转到借据详情页，并传递来源页面信息
+            window.location.href = `loan-detail.html?id=${loanId}&from=my-loans`;
         }
     </script>
 </body>

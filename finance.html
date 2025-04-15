@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>资金周转</title>
+    <title>借钱</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
@@ -11,7 +11,7 @@
             width: 100%;
             height: 100vh;
             margin: 0;
-            background-color: #F5F0FF;
+            background-color: #fff;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
@@ -66,108 +66,96 @@
             font-weight: 600;
             color: #333;
         }
-        .loan-tabs {
-            display: flex;
-            justify-content: center;
-            padding: 0;
-            gap: 48px;
-            position: relative;
-            background: white;
-            border-bottom: 1px solid #f0f0f0;
-        }
-        .loan-tab {
-            font-size: 14px;
-            color: #666;
-            cursor: pointer;
-            padding: 12px 0;
-            position: relative;
-            transition: all 0.3s ease;
-            font-weight: 500;
-        }
-        .loan-tab.active {
-            color: #653eb3;
-            font-weight: 600;
-        }
-        .loan-tab.active::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 24px;
-            height: 2px;
-            background: #653eb3;
-            border-radius: 1px;
-        }
-        .product-container {
-            padding: 24px;
+        .page-container {
+            padding: 16px;
             display: flex;
             flex-direction: column;
-            gap: 24px;
-            display: none;
+            gap: 16px;
         }
-        .product-container.active {
-            display: flex;
+        .loan-card {
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #f0f0f0;
+            margin-bottom: 16px;
+        }
+        .loan-type-tag {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background-color: #8A2BE2;
+            color: white;
+            font-size: 12px;
+            padding: 4px 12px;
+            border-bottom-left-radius: 8px;
         }
         .product-name {
-            font-size: 36px;
+            font-size: 28px;
             font-weight: bold;
             color: #4B0082;
-            margin-bottom: 12px;
+            margin-bottom: 8px;
         }
         .product-desc {
-            font-size: 18px;
+            font-size: 16px;
             color: #666;
-            margin-bottom: 24px;
+            margin-bottom: 16px;
         }
         .amount-section {
-            margin-bottom: 24px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: baseline;
         }
         .amount-value {
-            font-size: 48px;
+            font-size: 36px;
             font-weight: bold;
             color: #FF4444;
             line-height: 1.2;
         }
         .amount-unit {
-            font-size: 24px;
+            font-size: 20px;
             color: #FF4444;
             margin-left: 4px;
         }
         .amount-label {
-            font-size: 16px;
+            font-size: 14px;
             color: #666;
-            margin-top: 8px;
+            margin-left: 8px;
         }
         .tags-section {
             display: flex;
             flex-wrap: wrap;
-            gap: 12px;
-            margin-bottom: 24px;
+            gap: 8px;
+            margin-bottom: 16px;
         }
         .tag {
             border: 1px solid #8A2BE2;
             color: #8A2BE2;
-            padding: 8px 16px;
+            padding: 6px 12px;
             border-radius: 20px;
-            font-size: 14px;
+            font-size: 12px;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 4px;
         }
         .tag i {
-            font-size: 14px;
+            font-size: 12px;
         }
         .apply-btn {
-            background: #8A2BE2;
+            background: linear-gradient(90deg, #653eb3, #9370fa);
             color: white;
             width: 100%;
-            padding: 16px;
-            border-radius: 12px;
-            font-size: 18px;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 16px;
             font-weight: 500;
             border: none;
-            margin-bottom: 16px;
+            margin-bottom: 8px;
+        }
+        .apply-btn:active {
+            opacity: 0.9;
         }
         .branch-info {
             text-align: center;
@@ -189,6 +177,144 @@
         .branch-switch i {
             font-size: 12px;
         }
+        .section-title {
+            display: none;
+        }
+        .credit-card {
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            padding: 16px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #f0f0f0;
+            margin-top: 12px;
+        }
+        .credit-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .credit-title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #4B0082;
+            margin-bottom: 8px;
+        }
+        .credit-tag {
+            font-size: 12px;
+            color: #653eb3;
+            background-color: rgba(101, 62, 179, 0.08);
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+        .credit-amounts {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+        .credit-amount-item {
+            display: flex;
+            flex-direction: column;
+        }
+        .credit-amount-value {
+            font-size: 22px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        .credit-amount-label {
+            font-size: 12px;
+            color: #999;
+        }
+        .branch-selector {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1100;
+            height: 100%;
+            display: none;
+        }
+        .branch-selector.active {
+            display: block;
+        }
+        .branch-selector-content {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top-left-radius: 16px;
+            border-top-right-radius: 16px;
+            padding: 20px;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+        }
+        .branch-selector.active .branch-selector-content {
+            transform: translateY(0);
+        }
+        .branch-selector-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .branch-selector-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+        .branch-selector-close {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: #f5f5f5;
+            color: #666;
+        }
+        .branch-selector-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .branch-item {
+            padding: 16px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+        .branch-item:last-child {
+            border-bottom: none;
+        }
+        .branch-name {
+            font-size: 14px;
+            color: #333;
+        }
+        .branch-check {
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #653eb3;
+        }
+        .branch-confirm-btn {
+            width: 100%;
+            background: linear-gradient(90deg, #653eb3, #9370fa);
+            color: white;
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            border: none;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -207,123 +333,192 @@
         <a href="home.html" class="back-btn">
             <i class="fas fa-chevron-left"></i>
         </a>
-        <div class="header-title">资金周转</div>
+        <div class="header-title">借钱</div>
     </div>
 
-    <!-- 贷款类型切换 -->
-    <div class="loan-tabs">
-        <div class="loan-tab active" data-tab="enterprise">企业贷</div>
-        <div class="loan-tab" data-tab="personal">个人贷</div>
-    </div>
+    <!-- 页面内容 -->
+    <div class="page-container">
+        <!-- 企业贷部分 -->
+        <div class="section-title">企业贷款</div>
 
-    <!-- 企业贷内容 -->
-    <div class="product-container active" id="enterprise-content">
-        <!-- 产品名称和描述 -->
-        <div>
-            <div class="product-name">小微保</div>
-            <div class="product-desc">赋能网点，助力经营</div>
-        </div>
-
-        <!-- 金额显示 -->
-        <div class="amount-section">
+        <!-- 小微保已授信卡片 -->
+        <div class="credit-card" id="microCredit">
+            <div class="loan-type-tag">企业贷</div>
+            <!-- 产品名称 -->
             <div>
-                <span class="amount-value">500</span>
-                <span class="amount-unit">万</span>
+                <div class="credit-title">小微保</div>
             </div>
-            <div class="amount-label">最高可借</div>
+            
+            <div class="credit-amounts">
+                <div class="credit-amount-item">
+                    <div class="credit-amount-value">300<span style="font-size: 14px; font-weight: 500; margin-left: 2px;">万</span></div>
+                    <div class="credit-amount-label">授信总额度</div>
+                </div>
+                <div class="credit-amount-item">
+                    <div class="credit-amount-value">180<span style="font-size: 14px; font-weight: 500; margin-left: 2px;">万</span></div>
+                    <div class="credit-amount-label">剩余可用额度</div>
+                </div>
+            </div>
+            <button class="apply-btn" onclick="window.location.href='loan-application.html'">立即借款</button>
+            
+            <!-- 网点信息 -->
+            <div class="branch-info" onclick="showBranchSelector('microCredit');">
+                <span>951031 宁夏银川市金凤区丰阅</span>
+                <div class="branch-switch">
+                    <i class="fas fa-exchange-alt"></i>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 小微保产品卡片 -->
+        <div class="loan-card" id="microProduct" onclick="window.location.href='finance-detail.html?from=finance';" style="cursor: pointer; display: none;">
+            <div class="loan-type-tag">企业贷</div>
+            <!-- 产品名称和描述 -->
+            <div>
+                <div class="product-name">小微保</div>
+                <div class="product-desc">赋能网点，助力经营</div>
+            </div>
+
+            <!-- 金额显示 -->
+            <div class="amount-section">
+                <div class="amount-label">最高可借</div>
+                <div class="amount-value">500</div>
+                <div class="amount-unit">万</div>
+            </div>
+
+            <!-- 功能标签 -->
+            <div class="tags-section">
+                <div class="tag">
+                    <i class="fas fa-building"></i>
+                    <span>加盟公司专属</span>
+                </div>
+                <div class="tag">
+                    <i class="fas fa-check-circle"></i>
+                    <span>在线申请</span>
+                </div>
+                <div class="tag">
+                    <i class="fas fa-user-tie"></i>
+                    <span>专属客服</span>
+                </div>
+            </div>
+
+            <!-- 申请按钮 -->
+            <button class="apply-btn" id="enterprise-apply-btn" onclick="event.stopPropagation();">立即申请</button>
+
+            <!-- 网点信息 -->
+            <div class="branch-info" onclick="event.stopPropagation(); showBranchSelector('microProduct');">
+                <span>951032 宁夏银川市兴庆区大武口</span>
+                <div class="branch-switch">
+                    <i class="fas fa-exchange-alt"></i>
+                </div>
+            </div>
         </div>
 
-        <!-- 功能标签 -->
-        <div class="tags-section">
-            <div class="tag">
-                <i class="fas fa-building"></i>
-                <span>加盟公司专属</span>
+        <!-- 个人贷部分 -->
+        <div class="section-title">个人贷款</div>
+        
+        <!-- 秒贷产品卡片 -->
+        <div class="loan-card">
+            <div class="loan-type-tag">个人贷</div>
+            <!-- 产品名称和描述 -->
+            <div>
+                <div class="product-name">秒贷</div>
+                <div class="product-desc">免担保，申请快，轻松还</div>
             </div>
-            <div class="tag">
-                <i class="fas fa-check-circle"></i>
-                <span>在线申请</span>
+
+            <!-- 金额显示 -->
+            <div class="amount-section">
+                <div class="amount-label">最高可借</div>
+                <div class="amount-value">20</div>
+                <div class="amount-unit">万</div>
             </div>
-            <div class="tag">
-                <i class="fas fa-user-tie"></i>
-                <span>专属客服</span>
+
+            <!-- 功能标签 -->
+            <div class="tags-section">
+                <div class="tag">
+                    <i class="fas fa-building"></i>
+                    <span>纯信用</span>
+                </div>
+                <div class="tag">
+                    <i class="fas fa-check-circle"></i>
+                    <span>灵活支用</span>
+                </div>
+                <div class="tag">
+                    <i class="fas fa-user-tie"></i>
+                    <span>循环额度</span>
+                </div>
             </div>
+
+            <!-- 申请按钮 -->
+            <button class="apply-btn" id="personal-apply-btn">立即申请</button>
         </div>
-
-        <!-- 申请按钮 -->
-        <button class="apply-btn" id="enterprise-apply-btn">立即申请</button>
-
-        <!-- 网点信息 -->
-        <div class="branch-info">
-            <span>951031 宁夏银川市金凤区丰阅</span>
-            <div class="branch-switch">
-                <i class="fas fa-exchange-alt"></i>
+        
+        <!-- 秒贷已授信卡片 -->
+        <div class="credit-card">
+            <div class="loan-type-tag">个人贷</div>
+            <!-- 产品名称 -->
+            <div>
+                <div class="credit-title">秒贷</div>
             </div>
+            
+            <div class="credit-amounts">
+                <div class="credit-amount-item">
+                    <div class="credit-amount-value">10<span style="font-size: 14px; font-weight: 500; margin-left: 2px;">万</span></div>
+                    <div class="credit-amount-label">授信总额度</div>
+                </div>
+                <div class="credit-amount-item">
+                    <div class="credit-amount-value">10<span style="font-size: 14px; font-weight: 500; margin-left: 2px;">万</span></div>
+                    <div class="credit-amount-label">剩余可用额度</div>
+                </div>
+            </div>
+            <button class="apply-btn" onclick="window.location.href='loan-application.html'">立即借款</button>
         </div>
     </div>
 
-    <!-- 个人贷内容 -->
-    <div class="product-container" id="personal-content">
-        <!-- 产品名称和描述 -->
-        <div>
-            <div class="product-name">秒贷</div>
-            <div class="product-desc">免担保，申请快，轻松还</div>
+    <!-- 网点选择弹出框 -->
+    <div id="branchSelector" class="branch-selector">
+        <div class="branch-selector-content">
+            <div class="branch-selector-header">
+                <div class="branch-selector-title">选择网点</div>
+                <div class="branch-selector-close" onclick="hideBranchSelector()">
+                    <i class="fas fa-times"></i>
+                </div>
+            </div>
+            <div class="branch-selector-list">
+                <div class="branch-item" onclick="selectBranch(this)">
+                    <div class="branch-name">951031 宁夏银川市金凤区丰阅</div>
+                    <div class="branch-check"><i class="fas fa-check"></i></div>
+                </div>
+                <div class="branch-item" onclick="selectBranch(this)">
+                    <div class="branch-name">951032 宁夏银川市兴庆区大武口</div>
+                    <div class="branch-check"></div>
+                </div>
+                <div class="branch-item" onclick="selectBranch(this)">
+                    <div class="branch-name">951033 宁夏银川市西夏区贺兰山</div>
+                    <div class="branch-check"></div>
+                </div>
+                <div class="branch-item" onclick="selectBranch(this)">
+                    <div class="branch-name">951034 宁夏银川市金凤区亲水街</div>
+                    <div class="branch-check"></div>
+                </div>
+                <div class="branch-item" onclick="selectBranch(this)">
+                    <div class="branch-name">951035 宁夏银川市兴庆区文化街</div>
+                    <div class="branch-check"></div>
+                </div>
+            </div>
+            <button class="branch-confirm-btn" onclick="confirmBranchSelection()">确认</button>
         </div>
-
-        <!-- 金额显示 -->
-        <div class="amount-section">
-            <div>
-                <span class="amount-value">20</span>
-                <span class="amount-unit">万</span>
-            </div>
-            <div class="amount-label">最高可借</div>
-        </div>
-
-        <!-- 功能标签 -->
-        <div class="tags-section">
-            <div class="tag">
-                <i class="fas fa-building"></i>
-                <span>纯信用</span>
-            </div>
-            <div class="tag">
-                <i class="fas fa-check-circle"></i>
-                <span>灵活支用</span>
-            </div>
-            <div class="tag">
-                <i class="fas fa-user-tie"></i>
-                <span>循环额度</span>
-            </div>
-        </div>
-
-        <!-- 申请按钮 -->
-        <button class="apply-btn" id="personal-apply-btn">立即申请</button>
     </div>
 
     <script>
-        // 标签切换功能
-        const tabs = document.querySelectorAll('.loan-tab');
-        const contents = document.querySelectorAll('.product-container');
-
-        tabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                // 移除所有标签的激活状态
-                tabs.forEach(t => t.classList.remove('active'));
-                // 添加当前标签的激活状态
-                tab.classList.add('active');
-
-                // 隐藏所有内容
-                contents.forEach(content => content.classList.remove('active'));
-                // 显示对应内容
-                const targetId = `${tab.dataset.tab}-content`;
-                document.getElementById(targetId).classList.add('active');
-            });
-        });
-
         // 网点切换功能
         const branchSwitches = document.querySelectorAll('.branch-switch');
         branchSwitches.forEach(switchBtn => {
-            switchBtn.addEventListener('click', () => {
-                // 这里可以添加网点切换的逻辑
-                alert('切换网点');
+            switchBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const parentCard = e.target.closest('.credit-card, .loan-card');
+                const cardId = parentCard ? parentCard.id : null;
+                showBranchSelector(cardId);
             });
         });
         
@@ -332,12 +527,77 @@
         const personalApplyBtn = document.getElementById('personal-apply-btn');
         
         enterpriseApplyBtn.addEventListener('click', () => {
-            window.location.href = 'loan-application.html';
+            window.location.href = 'enterprise-verification.html';
         });
         
         personalApplyBtn.addEventListener('click', () => {
-            window.location.href = 'loan-application.html';
+            window.location.href = 'verification.html';
         });
+        
+        // 当前操作的卡片ID
+        let currentCardId = null;
+        
+        // 网点选择框相关功能
+        function showBranchSelector(cardId) {
+            currentCardId = cardId;
+            const selector = document.getElementById('branchSelector');
+            selector.classList.add('active');
+            
+            // 添加动画延迟
+            setTimeout(() => {
+                document.querySelector('.branch-selector-content').style.transform = 'translateY(0)';
+            }, 10);
+        }
+        
+        function hideBranchSelector() {
+            const selector = document.getElementById('branchSelector');
+            document.querySelector('.branch-selector-content').style.transform = 'translateY(100%)';
+            
+            // 延迟隐藏整个选择器，等待动画完成
+            setTimeout(() => {
+                selector.classList.remove('active');
+                currentCardId = null;
+            }, 300);
+        }
+        
+        function selectBranch(branchItem) {
+            // 清除所有选中标记
+            const checks = document.querySelectorAll('.branch-check');
+            checks.forEach(check => {
+                check.innerHTML = '';
+            });
+            
+            // 添加当前选中的标记
+            const check = branchItem.querySelector('.branch-check');
+            check.innerHTML = '<i class="fas fa-check"></i>';
+        }
+        
+        function confirmBranchSelection() {
+            // 获取选中的网点
+            const selectedBranch = document.querySelector('.branch-check i');
+            if (selectedBranch) {
+                const branchName = selectedBranch.parentElement.parentElement.querySelector('.branch-name').innerText;
+                
+                // 更新所有网点信息显示
+                const branchInfos = document.querySelectorAll('.branch-info span');
+                branchInfos.forEach(info => {
+                    info.innerText = branchName;
+                });
+                
+                // 根据当前操作的卡片切换显示
+                if (currentCardId === 'microCredit') {
+                    // 隐藏已授信卡片，显示产品卡片
+                    document.getElementById('microCredit').style.display = 'none';
+                    document.getElementById('microProduct').style.display = 'block';
+                } else if (currentCardId === 'microProduct') {
+                    // 隐藏产品卡片，显示已授信卡片
+                    document.getElementById('microProduct').style.display = 'none';
+                    document.getElementById('microCredit').style.display = 'block';
+                }
+            }
+            
+            hideBranchSelector();
+        }
     </script>
 </body>
 </html> 

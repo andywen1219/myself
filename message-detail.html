@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>留言详情</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            background-color: #f5f5f5;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .status-bar {
+            background-color: #000;
+            color: white;
+            padding: 12px 16px;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            height: 59px;
+            box-sizing: border-box;
+        }
+        
+        .status-bar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 59px;
+            background: #000;
+            z-index: -1;
+        }
+        
+        .header {
+            background: white;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            position: sticky;
+            top: 59px;
+            left: 0;
+            right: 0;
+            z-index: 999;
+            border-bottom: 1px solid #f0f0f0;
+            justify-content: center;
+        }
+        
+        .back-btn {
+            color: #333;
+            font-size: 16px;
+            padding: 8px;
+            margin-left: -8px;
+            position: absolute;
+            left: 16px;
+        }
+        
+        .header-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 16px auto;
+            padding: 0 16px;
+            padding-bottom: 80px;
+        }
+        
+        .card {
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            padding: 24px;
+            margin-bottom: 16px;
+        }
+        
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .card-title i {
+            color: #653eb3;
+        }
+        
+        .message-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+        
+        .message-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        
+        .user-info {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .user-name {
+            font-weight: 600;
+            color: #333;
+            font-size: 15px;
+        }
+        
+        .message-time {
+            color: #999;
+            font-size: 12px;
+        }
+        
+        .message-status {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            height: fit-content;
+        }
+        
+        .message-status.pending {
+            background-color: #fef3c7;
+            color: #ca8a04;
+        }
+        
+        .message-status.processing {
+            background-color: #e0f2fe;
+            color: #0284c7;
+        }
+        
+        .message-status.completed {
+            background-color: #dcfce7;
+            color: #16a34a;
+        }
+        
+        .message-status.rejected {
+            background-color: #fee2e2;
+            color: #dc2626;
+        }
+        
+        .message-tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-left: 8px;
+        }
+        
+        .message-tag.suggestion {
+            background-color: #f3e8fd;
+            color: #653eb3;
+        }
+        
+        .message-tag.question {
+            background-color: #fff7ed;
+            color: #ea580c;
+        }
+        
+        .message-tag.complaint {
+            background-color: #fef2f2;
+            color: #dc2626;
+        }
+        
+        .message-tag.other {
+            background-color: #f0fdf4;
+            color: #16a34a;
+        }
+        
+        .message-content {
+            margin-bottom: 20px;
+            line-height: 1.6;
+            font-size: 15px;
+            color: #333;
+            padding: 0 4px;
+        }
+        
+        .attachments {
+            margin-top: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .attachments-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .attachments-title i {
+            color: #653eb3;
+        }
+        
+        .attachment-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        
+        .attachment-item {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+        }
+        
+        .attachment-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .attachment-item .file-icon {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f3f4f6;
+            font-size: 24px;
+            color: #6b7280;
+        }
+        
+        .attachment-item .file-name {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: rgba(0, 0, 0, 0.6);
+            color: white;
+            font-size: 10px;
+            padding: 2px 4px;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+        
+        .divider {
+            height: 1px;
+            background-color: #e5e7eb;
+            margin: 20px 0;
+        }
+        
+        .reply-list {
+            margin-top: 16px;
+        }
+        
+        .reply-item {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #f0f0f0;
+            padding-bottom: 16px;
+            padding: 0 4px 16px 4px;
+        }
+        
+        .reply-item:last-child {
+            border-bottom: none;
+        }
+        
+        .reply-header {
+            display: flex;
+            justify-content: flex-start;
+            margin-bottom: 12px;
+            align-items: center;
+        }
+        
+        .reply-user {
+            display: none;
+        }
+        
+        .reply-time {
+            font-size: 12px;
+            color: #999;
+        }
+        
+        .reply-content {
+            flex: 1;
+            padding: 0;
+            position: relative;
+            background-color: transparent;
+            border-radius: 0;
+        }
+        
+        .reply-content::before {
+            display: none;
+        }
+        
+        .reply-text {
+            font-size: 14px;
+            color: #333;
+            line-height: 1.5;
+            margin-bottom: 12px;
+        }
+        
+        .reply-attachments {
+            margin-top: 12px;
+        }
+        
+        .reply-attachments-title {
+            font-size: 13px;
+            font-weight: 500;
+            color: #666;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .reply-attachments-title i {
+            color: #653eb3;
+            font-size: 12px;
+        }
+        
+        .reply-attachment-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .reply-attachment-item {
+            position: relative;
+            width: 70px;
+            height: 70px;
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+        }
+        
+        .reply-attachment-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .reply-attachment-item .file-icon {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f3f4f6;
+            font-size: 20px;
+            color: #6b7280;
+        }
+        
+        .reply-attachment-item .file-name {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: rgba(0, 0, 0, 0.6);
+            color: white;
+            font-size: 9px;
+            padding: 2px 4px;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+        
+        .reply-form {
+            margin-top: 20px;
+        }
+        
+        .reply-input-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        
+        .reply-attachments-upload {
+            margin-top: 8px;
+            border: 1px dashed #d1d5db;
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .reply-attachments-upload:hover {
+            border-color: #653eb3;
+            background-color: rgba(101, 62, 179, 0.05);
+        }
+        
+        .reply-attachments-upload-icon {
+            color: #653eb3;
+            font-size: 20px;
+            margin-bottom: 8px;
+        }
+        
+        .reply-attachments-upload-text {
+            font-size: 13px;
+            color: #666;
+        }
+        
+        .reply-preview-attachments {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        
+        .reply-preview-item {
+            position: relative;
+            width: 60px;
+            height: 60px;
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        
+        .reply-preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .reply-preview-item .preview-file-icon {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f3f4f6;
+            font-size: 20px;
+            color: #6b7280;
+        }
+        
+        .reply-preview-item .preview-remove {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            width: 16px;
+            height: 16px;
+            background-color: rgba(0, 0, 0, 0.6);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8px;
+            cursor: pointer;
+        }
+        
+        .reply-preview-item .preview-file-name {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: rgba(0, 0, 0, 0.6);
+            color: white;
+            font-size: 8px;
+            padding: 1px 3px;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+        
+        .reply-btn-container {
+            display: flex;
+            justify-content: flex-end;
+        }
+        
+        .reply-btn {
+            background-color: #653eb3;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 10px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .reply-btn:disabled {
+            background-color: #d1d5db;
+            cursor: not-allowed;
+        }
+        
+        .reply-btn:hover:not(:disabled) {
+            background-color: #5935a0;
+        }
+        
+        .reply-btn i {
+            margin-right: 4px;
+        }
+        
+        .bottom-nav {
+            height: 83px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+        
+        .safe-area-bottom {
+            height: 34px;
+            background: #fff;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 0 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 状态栏 -->
+    <div class="status-bar">
+        <div>9:41</div>
+        <div class="flex items-center space-x-2">
+            <i class="fas fa-signal"></i>
+            <i class="fas fa-wifi"></i>
+            <i class="fas fa-battery-full"></i>
+        </div>
+    </div>
+
+    <!-- 标题栏 -->
+    <div class="header">
+        <a href="message-list.html" class="back-btn">
+            <i class="fas fa-chevron-left"></i>
+        </a>
+        <div class="header-title">留言详情</div>
+    </div>
+
+    <div class="container">
+        <!-- 留言详情卡片 -->
+        <div class="card">
+            <div class="card-title">
+                <span>留言内容</span>
+            </div>
+            
+            <div class="message-info">
+                <div class="message-meta">
+                    <div class="massage-time">
+                        <div class="message-time">2023-05-20 09:15</div>
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <div class="message-tag question">
+                        <div class="message-tag-text">问题咨询</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="message-content">
+                请问如何修改我的个人资料？我在设置页面找不到相关选项，系统似乎没有提供这个功能，或者隐藏得比较深。我尝试点击了个人头像，但只能修改头像图片，无法编辑其他信息如昵称、联系方式等。是否可以增加这个功能或者告诉我正确的操作路径？谢谢！
+            </div>
+            
+            <div class="attachments">
+                <div class="attachments-title">
+                    <i class="fas fa-paperclip"></i>
+                    <span>附件 (2)</span>
+                </div>
+                <div class="attachment-list">
+                    <div class="attachment-item">
+                        <img src="https://images.unsplash.com/photo-1517430816045-df4b7de11d1d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=100&q=80" alt="截图">
+                        <div class="file-name">截图1.jpg</div>
+                    </div>
+                    <div class="attachment-item">
+                        <div class="file-icon">
+                            <i class="fas fa-file-word"></i>
+                        </div>
+                        <div class="file-name">问题描述.docx</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 回复卡片 -->
+        <div class="card">
+            <div class="card-title">
+                <span>回复</span>
+            </div>
+            
+            <div class="reply-list">
+                <div class="reply-item">
+                    <div class="reply-header">
+                        <div class="reply-time">2023-05-20 10:30</div>
+                    </div>
+                    <div class="reply-content">
+                        <div class="reply-text">
+                            您好，感谢您的反馈。目前个人资料修改功能在【我的】-【设置】-【账号与安全】中，点击【个人信息】即可修改。我们会考虑在下一版本优化这一功能的可见性和易用性。
+                        </div>
+                        <div class="reply-attachments">
+                            <div class="reply-attachments-title">
+                                <i class="fas fa-paperclip"></i>
+                                <span>附件 (2)</span>
+                            </div>
+                            <div class="reply-attachment-list">
+                                <div class="reply-attachment-item">
+                                    <img src="https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=100&q=80" alt="操作截图">
+                                    <div class="file-name">操作指引.jpg</div>
+                                </div>
+                                <div class="reply-attachment-item">
+                                    <div class="file-icon">
+                                        <i class="fas fa-file-pdf"></i>
+                                    </div>
+                                    <div class="file-name">用户手册.pdf</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 处理附件点击
+            document.addEventListener('click', function(e) {
+                const attachmentItem = e.target.closest('.attachment-item') || e.target.closest('.reply-attachment-item');
+                if (attachmentItem) {
+                    const fileName = attachmentItem.querySelector('.file-name').textContent;
+                    alert(`查看附件: ${fileName}`);
+                }
+            });
+        });
+    </script>
+</body>
+</html> 

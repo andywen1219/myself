@@ -319,13 +319,11 @@
         <div class="filter-row">
             <div class="filter-item">
                 <select class="filter-input">
-                    <option value="">上海区</option>
-                    <option value="zhejiang_south">江苏省区</option>
-                    <option value="zhejiang_north">浙江省区</option>
-                    <option value="jiangsu">安徽省区</option>
-                    <option value="jiangsu">福建省区</option>
-                    <option value="jiangsu">江西省区</option>
-                    <option value="jiangsu">山东省区</option>
+                    <option value="">选择区域</option>
+                    <option value="shanghai">上海区</option>
+                    <option value="zhejiang_south">浙南省区</option>
+                    <option value="zhejiang_north">浙北省区</option>
+                    <option value="jiangsu">江苏省区</option>
                 </select>
             </div>
             <div class="filter-item">
@@ -399,9 +397,9 @@
         new Chart(distributionCtx, {
             type: 'doughnut',
             data: {
-                labels: ['山东省区', '江西省区', '上海区', '江苏省区', '浙江省区', '江西省区'],
+                labels: ['安徽省', '浙江省', '江苏省', '上海市', '山东省', '其他'],
                 datasets: [{
-                    data: [7, 3, 30, 30, 25, 5],
+                    data: [35, 25, 20, 10, 7, 3],
                     backgroundColor: [
                         '#653eb3',
                         '#2563eb',
@@ -418,11 +416,6 @@
                 plugins: {
                     legend: {
                         position: 'right'
-                    }
-                },
-                onClick: function(event, elements) {
-                    if (elements.length > 0) {
-                        window.location.href = 'customer-list-province.html';
                     }
                 }
             }
