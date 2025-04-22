@@ -379,6 +379,21 @@
             border-radius: 50%;
             object-fit: cover;
         }
+        .repay-btn {
+            width: 100%;
+            background: linear-gradient(90deg, #9370fa, #653eb3);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: opacity 0.2s ease;
+        }
+        .repay-btn:active {
+            opacity: 0.9;
+        }
     </style>
 </head>
 <body class="relative">
@@ -442,6 +457,12 @@
                         </a>
                     </div>
                     <div class="flex flex-col items-center py-2">
+                        <a href="my-loans.html" class="flex flex-col items-center">
+                            <img src="images/还款.svg" alt="借钱" class="feature-icon">
+                            <span class="feature-text">还款</span>
+                        </a>
+                    </div>
+                    <div class="flex flex-col items-center py-2">
                         <a href="message-list.html" class="flex flex-col items-center">
                             <img src="images/留言板.svg" alt="留言板" class="feature-icon">
                             <span class="feature-text">留言板</span>
@@ -487,8 +508,8 @@
                 </div>
                 <div class="data-grid">
                     <div class="data-item">
-                        <div class="data-item-label">借款客户数</div>
-                        <div class="data-item-value blue">1,234</div>
+                        <div class="data-item-label">总贷款金额</div>
+                        <div class="data-item-value blue">¥1,234,567.00</div>
                     </div>
                     <div class="data-item">
                         <div class="data-item-label">剩余待还本金</div>
@@ -497,7 +518,7 @@
                 </div>
                 <div class="coverage-section">
                     <div class="coverage-header">
-                        <span class="coverage-title">贷款覆盖率</span>
+                        <span class="coverage-title">还款进度</span>
                         <span class="coverage-value">65%</span>
                     </div>
                     <div class="progress-bar">
@@ -512,6 +533,9 @@
                             <span>下次还款金额：</span>
                             <span class="coverage-stat-value">¥12,345</span>
                         </div>
+                    </div>
+                    <div class="mt-4">
+                        <button class="repay-btn" onclick="window.location.href='repayment.html?from=home';">去还款</button>
                     </div>
                 </div>
             </div>

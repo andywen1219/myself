@@ -11,7 +11,7 @@
             width: 100%;
             height: 100vh;
             margin: 0;
-            background-color: #F5F0FF;
+            background-color: #fff;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
@@ -212,9 +212,6 @@
         <!-- 网点信息 -->
         <div class="branch-info">
             <span>951031 宁夏银川市金凤区丰阅</span>
-            <div class="branch-switch">
-                <i class="fas fa-exchange-alt"></i>
-            </div>
         </div>
     </div>
 
@@ -237,17 +234,10 @@
             }
         }
         
-        // 网点切换功能
-        const branchSwitch = document.querySelector('.branch-switch');
-        branchSwitch.addEventListener('click', () => {
-            // 这里可以添加网点切换的逻辑
-            alert('切换网点');
-        });
-        
         // 申请按钮点击事件
         const applyBtn = document.getElementById('apply-btn');
         applyBtn.addEventListener('click', () => {
-            window.location.href = 'loan-application.html';
+            window.location.href = 'enterprise-verification.html';
         });
     </script>
 </body>

@@ -657,17 +657,6 @@
         </div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // 处理附件点击
-            document.addEventListener('click', function(e) {
-                const attachmentItem = e.target.closest('.attachment-item') || e.target.closest('.reply-attachment-item');
-                if (attachmentItem) {
-                    const fileName = attachmentItem.querySelector('.file-name').textContent;
-                    alert(`查看附件: ${fileName}`);
-                }
-            });
-        });
-    </script>
+
 </body>
 </html> 

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>企业列表</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            background-color: #f7f7f9;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            color: #333;
+        }
+        .status-bar {
+            background-color: #000;
+            color: white;
+            padding: 12px 16px;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            height: 59px;
+            box-sizing: border-box;
+        }
+        .header {
+            background: white;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            position: sticky;
+            top: 59px;
+            left: 0;
+            right: 0;
+            z-index: 999;
+            border-bottom: 1px solid #f0f0f0;
+            justify-content: center;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        .back-btn {
+            color: #333;
+            font-size: 16px;
+            padding: 8px;
+            margin-left: -8px;
+            position: absolute;
+            left: 16px;
+        }
+        .header-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+        .enterprise-item {
+            background: white;
+            border-radius: 12px;
+            margin: 16px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .enterprise-item:active {
+            transform: scale(0.98);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+        }
+        .enterprise-content {
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .enterprise-info {
+            flex: 1;
+        }
+        .enterprise-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        .enterprise-code {
+            font-size: 13px;
+            color: #666;
+        }
+        .arrow-icon {
+            color: #ccc;
+            font-size: 14px;
+        }
+        .add-enterprise-btn {
+            position: fixed;
+            bottom: 32px;
+            right: 24px;
+            width: 50px;
+            height: 50px;
+            border-radius: 25px;
+            background: linear-gradient(135deg, #653eb3, #9370fa);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 4px 12px rgba(101, 62, 179, 0.2);
+            z-index: 100;
+            transition: transform 0.2s;
+        }
+        .add-enterprise-btn:active {
+            transform: scale(0.95);
+        }
+        .no-enterprise {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+            text-align: center;
+            color: #999;
+        }
+        .no-enterprise-icon {
+            font-size: 48px;
+            color: #e0e0e0;
+            margin-bottom: 16px;
+        }
+        .no-enterprise-text {
+            font-size: 15px;
+            margin-bottom: 8px;
+        }
+        .no-enterprise-subtext {
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 状态栏 -->
+    <div class="status-bar">
+        <div>9:41</div>
+        <div class="flex items-center space-x-2">
+            <i class="fas fa-signal"></i>
+            <i class="fas fa-wifi"></i>
+            <i class="fas fa-battery-full"></i>
+        </div>
+    </div>
+
+    <!-- 标题栏 -->
+    <div class="header">
+        <a href="profile.html" class="back-btn">
+            <i class="fas fa-chevron-left"></i>
+        </a>
+        <div class="header-title">我的企业</div>
+    </div>
+
+    <!-- 企业列表 -->
+    <div class="enterprise-list">
+        <!-- 企业项目 -->
+        <div class="enterprise-item" onclick="window.location.href='enterprise-profile.html'">
+            <div class="enterprise-content">
+                <div class="enterprise-info">
+                    <div class="enterprise-name">宁夏银川市金凤区丰阅网点</div>
+                    <div class="enterprise-code">91640106MA774XRP2B</div>
+                </div>
+                <i class="fas fa-chevron-right arrow-icon"></i>
+            </div>
+        </div>
+        
+        <div class="enterprise-item" onclick="window.location.href='enterprise-profile.html'">
+            <div class="enterprise-content">
+                <div class="enterprise-info">
+                    <div class="enterprise-name">宁夏银川市西夏区常盛网点</div>
+                    <div class="enterprise-code">91640105MA773BTX7P</div>
+                </div>
+                <i class="fas fa-chevron-right arrow-icon"></i>
+            </div>
+        </div>
+        
+        <div class="enterprise-item" onclick="window.location.href='enterprise-profile.html'">
+            <div class="enterprise-content">
+                <div class="enterprise-info">
+                    <div class="enterprise-name">宁夏银川市兴庆区万达网点</div>
+                    <div class="enterprise-code">91640104MA774DPT1Y</div>
+                </div>
+                <i class="fas fa-chevron-right arrow-icon"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加企业按钮 -->
+    <div class="add-enterprise-btn" id="addEnterpriseBtn">
+        <i class="fas fa-plus"></i>
+    </div>
+
+    <script>
+        // 添加企业按钮点击事件
+        document.getElementById('addEnterpriseBtn').addEventListener('click', function() {
+            // 添加点击效果
+            this.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                this.style.transform = 'scale(1)';
+                // 跳转到企业认证页面
+                window.location.href = 'enterprise-verification.html';
+            }, 200);
+        });
+    </script>
+</body>
+</html> 

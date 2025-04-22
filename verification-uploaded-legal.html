@@ -190,6 +190,49 @@
         .submit-btn:active {
             opacity: 0.9;
         }
+        .tips-card {
+            background: white;
+            border-radius: 12px;
+            margin: 16px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+        .tips-content {
+            padding: 16px;
+        }
+        .tip-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .tip-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .tip-item {
+            font-size: 13px;
+            color: #666;
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+        .tip-item:last-child {
+            border-bottom: none;
+        }
+        .tip-icon {
+            color: #653eb3;
+            margin-top: 2px;
+        }
+        .tip-text {
+            flex: 1;
+        }
     </style>
 </head>
 <body class="pb-24">
@@ -208,7 +251,15 @@
         <a href="profile.html" class="back-btn">
             <i class="fas fa-chevron-left"></i>
         </a>
-        <div class="header-title">实名认证</div>
+        <div class="header-title">法人认证</div>
+    </div>
+
+    <!-- 认证提示 -->
+    <div class="tips-card">
+        <div class="tips-content" style="padding: 16px; display: flex; align-items: center;">
+            <i class="fas fa-info-circle text-[#653eb3] mr-2"></i>
+            <p style="margin: 0; font-size: 14px; color: #333;">请上传法定代表人<span style="font-weight: 600; color: #653eb3;">张大力</span>本人的有效身份证件</p>
+        </div>
     </div>
 
     <!-- 上传区域 - 显示已上传照片 -->
@@ -229,7 +280,7 @@
 
     <!-- OCR识别信息区域 -->
     <div class="ocr-card">
-        <div class="card-title">OCR识别信息</div>
+        <div class="card-title">法人信息</div>
         <div class="ocr-content">
             <!-- 姓名 -->
             <div class="info-row">
@@ -246,7 +297,7 @@
             <!-- 手机号 -->
             <div class="input-group">
                 <div class="info-label">手机号</div>
-                <input type="tel" class="form-input" placeholder="请输入实名认证手机号">
+                <input type="tel" class="form-input" placeholder="请输入法人实名认证手机号">
             </div>
             
             <!-- 验证码 -->

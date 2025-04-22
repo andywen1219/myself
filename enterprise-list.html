@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>企业列表</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            background-color: #f7f7f9;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            color: #333;
+        }
+        .status-bar {
+            background-color: #000;
+            color: white;
+            padding: 12px 16px;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            height: 59px;
+            box-sizing: border-box;
+        }
+        .header {
+            background: white;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            position: sticky;
+            top: 59px;
+            left: 0;
+            right: 0;
+            z-index: 999;
+            border-bottom: 1px solid #f0f0f0;
+            justify-content: center;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        .back-btn {
+            color: #333;
+            font-size: 16px;
+            padding: 8px;
+            margin-left: -8px;
+            position: absolute;
+            left: 16px;
+        }
+        .header-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+        .enterprise-item {
+            background: white;
+            border-radius: 12px;
+            margin: 16px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+        .enterprise-item.active {
+            box-shadow: 0 2px 8px rgba(101, 62, 179, 0.15);
+            border-left: 3px solid #653eb3;
+        }
+        .enterprise-content {
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .enterprise-info {
+            flex: 1;
+        }
+        .enterprise-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        .enterprise-code {
+            font-size: 13px;
+            color: #666;
+        }
+        .arrow-icon {
+            color: #999;
+            font-size: 14px;
+            transition: transform 0.3s ease;
+        }
+        .arrow-icon.rotate {
+            transform: rotate(90deg);
+            color: #653eb3;
+        }
+        .add-enterprise-btn {
+            position: fixed;
+            bottom: 32px;
+            right: 24px;
+            width: 50px;
+            height: 50px;
+            border-radius: 25px;
+            background: linear-gradient(135deg, #653eb3, #9370fa);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 4px 12px rgba(101, 62, 179, 0.2);
+            z-index: 100;
+            transition: transform 0.2s;
+        }
+        .add-enterprise-btn:active {
+            transform: scale(0.95);
+        }
+        .enterprise-details {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out, padding 0.3s ease;
+            background: #fafafa;
+            border-top: 1px solid #f0f0f0;
+            padding: 0;
+            opacity: 0;
+        }
+        .enterprise-details.expanded {
+            max-height: 2000px;
+            padding: 16px;
+            opacity: 1;
+            transition: max-height 0.5s ease-in-out, padding 0.3s ease, opacity 0.3s ease 0.1s;
+        }
+        .detail-section {
+            margin-bottom: 16px;
+        }
+        .detail-section:last-child {
+            margin-bottom: 0;
+        }
+        .detail-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .detail-title-with-subtitle {
+            justify-content: flex-start;
+        }
+        .detail-title .edit-icon {
+            width: 16px;
+            height: 16px;
+            opacity: 0.7;
+            cursor: pointer;
+            margin-left: auto;
+        }
+        .detail-title .add-text {
+            font-size: 12px;
+            color: #653eb3;
+            font-weight: normal;
+            cursor: pointer;
+            margin-left: auto;
+        }
+        .detail-subtitle {
+            font-size: 12px;
+            color: #653eb3;
+            font-weight: normal;
+            margin-left: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        .detail-subtitle i {
+            font-size: 10px;
+            margin-left: 4px;
+        }
+        .detail-row {
+            display: flex;
+            margin-bottom: 10px;
+            align-items: flex-start;
+        }
+        .detail-label {
+            font-size: 13px;
+            color: #999;
+            width: 90px;
+            flex-shrink: 0;
+            padding-top: 1px;
+        }
+        .detail-value {
+            font-size: 14px;
+            color: #333;
+            flex: 1;
+            line-height: 1.4;
+        }
+        .branch-cards {
+            display: flex;
+            overflow-x: auto;
+            gap: 12px;
+            padding: 4px 0 8px 0;
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
+        }
+        .branch-cards::-webkit-scrollbar {
+            display: none;
+        }
+        .branch-card {
+            flex-shrink: 0;
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #eee;
+            width: 200px;
+        }
+        .branch-code {
+            font-size: 12px;
+            color: #653eb3;
+            margin-bottom: 4px;
+        }
+        .branch-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+        }
+        .account-card {
+            display: flex;
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #eee;
+            margin-bottom: 10px;
+            align-items: center;
+            gap: 12px;
+        }
+        .account-card:last-child {
+            margin-bottom: 0;
+        }
+        .account-icon {
+            width: 24px;
+            height: 24px;
+        }
+        .account-info {
+            flex: 1;
+        }
+        .account-number {
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 2px;
+        }
+        .account-bank {
+            font-size: 12px;
+            color: #999;
+        }
+        .handler-card {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #eee;
+        }
+        .handler-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        .handler-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .handler-card .edit-icon {
+            width: 16px;
+            height: 16px;
+            opacity: 0.7;
+            cursor: pointer;
+            align-self: center;
+        }
+        .handler-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+        }
+        .handler-phone {
+            font-size: 13px;
+            color: #666;
+        }
+        .handler-id {
+            font-size: 12px;
+            color: #999;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .id-icon {
+            width: 14px;
+            height: 14px;
+            opacity: 0.7;
+        }
+        .action-row {
+            display: flex;
+            justify-content: center;
+            margin-top: 16px;
+        }
+        .action-btn {
+            padding: 8px 24px;
+            border-radius: 20px;
+            border: 1px solid #653eb3;
+            color: #653eb3;
+            font-size: 13px;
+            background: white;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .action-btn:hover {
+            background: #f9f6ff;
+        }
+        /* 页面加载动画 */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #6c3cbf;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- 加载动画 -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+    </div>
+    
+    <!-- 状态栏 -->
+    <div class="status-bar">
+        <div>9:41</div>
+        <div class="flex items-center space-x-2">
+            <i class="fas fa-signal"></i>
+            <i class="fas fa-wifi"></i>
+            <i class="fas fa-battery-full"></i>
+        </div>
+    </div>
+
+    <!-- 标题栏 -->
+    <div class="header">
+        <a href="profile.html" class="back-btn">
+            <i class="fas fa-chevron-left"></i>
+        </a>
+        <div class="header-title">我的企业</div>
+    </div>
+
+    <!-- 企业列表 -->
+    <div class="enterprise-list">
+        <!-- 企业项目1 -->
+        <div class="enterprise-item" data-id="1">
+            <div class="enterprise-content">
+                <div class="enterprise-info">
+                    <div class="enterprise-name">宁夏银川XXX物流运输有限公司</div>
+                    <div class="enterprise-code">91640106MA774XRP2B</div>
+                </div>
+                <i class="fas fa-chevron-right arrow-icon"></i>
+            </div>
+            <div class="enterprise-details">
+                <!-- 企业基本信息 -->
+                <div class="detail-section">
+                    <div class="detail-title">
+                        企业基本信息
+                        <img src="images/编辑.svg" alt="编辑" class="edit-icon">
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">企业名称</div>
+                        <div class="detail-value">宁夏银川XXX物流运输有限公司</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">统一代码</div>
+                        <div class="detail-value">91640106MA774XRP2B</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">法定代表人</div>
+                        <div class="detail-value">张丰阅</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">联系电话</div>
+                        <div class="detail-value">138****8888</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">注册地址</div>
+                        <div class="detail-value">宁夏回族自治区银川市金凤区正源北街丰登社区5号楼1层112号营业房</div>
+                    </div>
+                </div>
+                
+                <!-- 网点信息 -->
+                <div class="detail-section">
+                    <div class="detail-title">网点信息</div>
+                    <div class="branch-cards">
+                        <div class="branch-card">
+                            <div class="branch-code">951031</div>
+                            <div class="branch-name">宁夏银川市金凤区丰阅网点</div>
+                        </div>
+                        <div class="branch-card">
+                            <div class="branch-code">951032</div>
+                            <div class="branch-name">宁夏银川市西夏区常盛网点</div>
+                        </div>
+                        <div class="branch-card">
+                            <div class="branch-code">951033</div>
+                            <div class="branch-name">宁夏银川市兴庆区万达网点</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 对公账户 -->
+                <div class="detail-section">
+                    <div class="detail-title">
+                        对公账户
+                        <span style="font-size: 12px; color: #653eb3; font-weight: normal; cursor: pointer;">+ 增加</span>
+                    </div>
+                    <div class="account-card">
+                        <img src="images/对公账户.svg" alt="对公账户" class="account-icon">
+                        <div class="account-info">
+                            <div class="account-number">622848******4567</div>
+                            <div class="account-bank">中国银行</div>
+                        </div>
+                        <img src="images/编辑.svg" alt="编辑" class="edit-icon">
+                    </div>
+                    <div class="account-card">
+                        <img src="images/对公账户.svg" alt="对公账户" class="account-icon">
+                        <div class="account-info">
+                            <div class="account-number">621058******8910</div>
+                            <div class="account-bank">宁夏银行</div>
+                        </div>
+                        <img src="images/编辑.svg" alt="编辑" class="edit-icon">
+                    </div>
+                </div>
+                
+                <!-- 企业经办人 -->
+                <div class="detail-section">
+                    <div class="detail-title detail-title-with-subtitle">
+                        <span>企业经办人</span>
+                        <div class="detail-subtitle" id="handler-process-btn-1">
+                            点击查看经办人申请借款流程
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                    <div class="handler-card">
+                        <div class="handler-row">
+                            <div class="handler-info">
+                                <div class="handler-name">王小明</div>
+                                <div class="handler-phone">159****7766</div>
+                            </div>
+                            <img src="images/编辑.svg" alt="编辑" class="edit-icon">
+                        </div>
+                        <div class="handler-id">
+                            <img src="images/身份证号.svg" alt="身份证号" class="id-icon">
+                            <span>640***********5214</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 企业项目2 -->
+        <div class="enterprise-item" data-id="2">
+            <div class="enterprise-content">
+                <div class="enterprise-info">
+                    <div class="enterprise-name">宁夏XXX物流运输有限公司</div>
+                    <div class="enterprise-code">91640105MA773BTX7P</div>
+                </div>
+                <i class="fas fa-chevron-right arrow-icon"></i>
+            </div>
+            <div class="enterprise-details">
+                <!-- 这里放置第二个企业的详情信息，与第一个结构类似 -->
+                <div class="detail-section">
+                    <div class="detail-title">
+                        企业基本信息
+                        <img src="images/编辑.svg" alt="编辑" class="edit-icon">
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">企业名称</div>
+                        <div class="detail-value">宁夏XXX物流运输有限公司</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">统一代码</div>
+                        <div class="detail-value">91640105MA773BTX7P</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">法定代表人</div>
+                        <div class="detail-value">李常盛</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">联系电话</div>
+                        <div class="detail-value">138****9999</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">注册地址</div>
+                        <div class="detail-value">宁夏回族自治区银川市西夏区文萃北街219号</div>
+                    </div>
+                </div>
+
+                <!-- 网点信息 -->
+                <div class="detail-section">
+                    <div class="detail-title">网点信息</div>
+                    <div class="branch-cards">
+                        <div class="branch-card">
+                            <div class="branch-code">951031</div>
+                            <div class="branch-name">宁夏银川市金凤区丰阅网点</div>
+                        </div>
+                        <div class="branch-card">
+                            <div class="branch-code">951032</div>
+                            <div class="branch-name">宁夏银川市西夏区常盛网点</div>
+                        </div>
+                        <div class="branch-card">
+                            <div class="branch-code">951033</div>
+                            <div class="branch-name">宁夏银川市兴庆区万达网点</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 对公账户 -->
+                <div class="detail-section">
+                    <div class="detail-title">
+                        对公账户
+                        <span style="font-size: 12px; color: #653eb3; font-weight: normal; cursor: pointer;">+ 增加</span>
+                    </div>
+                </div>
+                
+                <!-- 企业经办人 -->
+                <div class="detail-section">
+                    <div class="detail-title detail-title-with-subtitle">
+                        <span>企业经办人</span>
+                        <div class="detail-subtitle" id="handler-process-btn-2">
+                            点击查看经办人申请借款流程
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                        <span class="add-text">+ 添加</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 企业项目3 -->
+        <div class="enterprise-item" data-id="3">
+            <div class="enterprise-content">
+                <div class="enterprise-info">
+                    <div class="enterprise-name">宁夏兴庆XX物流有限公司</div>
+                    <div class="enterprise-code">91640104MA774DPT1Y</div>
+                </div>
+                <i class="fas fa-chevron-right arrow-icon"></i>
+            </div>
+            <div class="enterprise-details">
+                <!-- 这里放置第三个企业的详情信息，与第一个结构类似 -->
+                <div class="detail-section">
+                    <div class="detail-title">
+                        企业基本信息
+                        <img src="images/编辑.svg" alt="编辑" class="edit-icon">
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">企业名称</div>
+                        <div class="detail-value">宁夏兴庆XX物流有限公司</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">统一代码</div>
+                        <div class="detail-value">91640104MA774DPT1Y</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">法定代表人</div>
+                        <div class="detail-value">王建国</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">联系电话</div>
+                        <div class="detail-value">139****7777</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">注册地址</div>
+                        <div class="detail-value">宁夏回族自治区银川市兴庆区新华东路456号万达广场3号楼</div>
+                    </div>
+                </div>
+                
+                <!-- 网点信息 -->
+                <div class="detail-section">
+                    <div class="detail-title">网点信息</div>
+                    <div class="branch-cards">
+                        <div class="branch-card">
+                            <div class="branch-code">951031</div>
+                            <div class="branch-name">宁夏银川市金凤区丰阅网点</div>
+                        </div>
+                        <div class="branch-card">
+                            <div class="branch-code">951032</div>
+                            <div class="branch-name">宁夏银川市西夏区常盛网点</div>
+                        </div>
+                        <div class="branch-card">
+                            <div class="branch-code">951033</div>
+                            <div class="branch-name">宁夏银川市兴庆区万达网点</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 对公账户 -->
+                <div class="detail-section">
+                    <div class="detail-title">
+                        对公账户
+                        <span style="font-size: 12px; color: #653eb3; font-weight: normal; cursor: pointer;">+ 添加</span>
+                    </div>
+                </div>
+
+                <!-- 企业经办人 -->
+                <div class="detail-section">
+                    <div class="detail-title detail-title-with-subtitle">
+                        <span>企业经办人</span>
+                        <div class="detail-subtitle" id="handler-process-btn-3">
+                            点击查看经办人申请借款流程
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                        <span class="add-text">+ 添加</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加企业按钮 -->
+    <div class="add-enterprise-btn" id="addEnterpriseBtn">
+        <i class="fas fa-plus"></i>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 隐藏加载动画
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            if (loadingOverlay) {
+                setTimeout(() => {
+                    loadingOverlay.style.opacity = '0';
+                    setTimeout(() => {
+                        loadingOverlay.style.display = 'none';
+                    }, 300);
+                }, 500);
+            }
+            
+            // 添加企业按钮点击事件
+            document.getElementById('addEnterpriseBtn').addEventListener('click', function() {
+                // 添加点击效果
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = 'scale(1)';
+                    // 跳转到企业认证页面
+                    window.location.href = 'enterprise-verification.html';
+                }, 200);
+            });
+            
+            // 企业项点击展开事件
+            const enterpriseItems = document.querySelectorAll('.enterprise-item');
+            
+            // 设置初始状态
+            enterpriseItems.forEach(item => {
+                const details = item.querySelector('.enterprise-details');
+                const arrow = item.querySelector('.arrow-icon');
+                
+                // 初始状态设为收起
+                details.classList.remove('expanded');
+                arrow.classList.remove('rotate');
+                item.classList.remove('active');
+            });
+            
+            // 为所有企业项添加点击事件
+            enterpriseItems.forEach(item => {
+                const header = item.querySelector('.enterprise-content');
+                const details = item.querySelector('.enterprise-details');
+                const arrow = item.querySelector('.arrow-icon');
+                
+                header.addEventListener('click', function(e) {
+                    // 阻止冒泡
+                    e.stopPropagation();
+                    
+                    const isExpanded = details.classList.contains('expanded');
+                    
+                    // 先收起所有企业
+                    enterpriseItems.forEach(otherItem => {
+                        const otherDetails = otherItem.querySelector('.enterprise-details');
+                        const otherArrow = otherItem.querySelector('.arrow-icon');
+                        
+                        otherDetails.classList.remove('expanded');
+                        otherArrow.classList.remove('rotate');
+                        otherItem.classList.remove('active');
+                    });
+                    
+                    // 如果当前是收起状态，则展开
+                    if (!isExpanded) {
+                        details.classList.add('expanded');
+                        arrow.classList.add('rotate');
+                        item.classList.add('active');
+                        
+                        // 滚动到视图
+                        setTimeout(() => {
+                            item.scrollIntoView({behavior: 'smooth', block: 'start'});
+                        }, 300);
+                    }
+                });
+            });
+            
+            // 阻止详情区域的点击事件冒泡
+            document.querySelectorAll('.enterprise-details').forEach(detail => {
+                detail.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
+            });
+            
+            // 阻止编辑图标的点击事件冒泡
+            document.querySelectorAll('.edit-icon').forEach(icon => {
+                icon.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    
+                    // 点击效果
+                    this.style.opacity = 0.5;
+                    setTimeout(() => {
+                        this.style.opacity = 1;
+                        // 这里可以添加跳转逻辑，暂时只显示提示
+                        alert('跳转至编辑页面');
+                    }, 200);
+                });
+            });
+            
+            // 为所有"进入企业详情编辑"按钮添加点击事件
+            document.querySelectorAll('.action-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    
+                    const enterpriseId = this.closest('.enterprise-item').getAttribute('data-id');
+                    window.location.href = 'enterprise-profile.html?id=' + enterpriseId;
+                });
+            });
+            
+            // 为经办人申请借款流程副标题添加点击事件
+            document.querySelectorAll('[id^="handler-process-btn"]').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    
+                    // 添加点击效果
+                    this.style.opacity = '0.7';
+                    setTimeout(() => {
+                        this.style.opacity = '1';
+                        // 显示提示或跳转到相关页面
+                        alert('查看经办人申请借款流程');
+                        // 实际中可以替换为：
+                        // window.location.href = '经办人借款流程.html';
+                    }, 150);
+                });
+            });
+            
+            // 为经办人"+新增"按钮添加点击事件
+            document.querySelectorAll('.add-text').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    // 阻止事件冒泡
+                    e.stopPropagation();
+                    
+                    // 添加点击效果
+                    this.style.opacity = '0.7';
+                    setTimeout(() => {
+                        this.style.opacity = '1';
+                        // 显示提示或跳转到相关页面
+                        alert('新增经办人');
+                        // 实际中可以替换为：
+                        // window.location.href = '新增经办人.html';
+                    }, 150);
+                });
+            });
+        });
+    </script>
+</body>
+</html> 

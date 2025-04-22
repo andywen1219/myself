@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>企业信息</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            background-color: #f5f5f5;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .status-bar {
+            background-color: #000;
+            color: white;
+            padding: 12px 16px;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            height: 59px;
+            box-sizing: border-box;
+        }
+        .status-bar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 59px;
+            background: #000;
+            z-index: -1;
+        }
+        .header {
+            background: white;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            position: sticky;
+            top: 59px;
+            left: 0;
+            right: 0;
+            z-index: 999;
+            border-bottom: 1px solid #f0f0f0;
+            justify-content: center;
+        }
+        .header-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .back-btn {
+            color: #333;
+            font-size: 16px;
+            padding: 8px;
+            margin-left: -8px;
+            position: absolute;
+            left: 16px;
+        }
+        .header-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+        .header-subtitle {
+            font-size: 12px;
+            color: #653eb3;
+            margin-top: 4px;
+            cursor: pointer;
+        }
+        .info-card {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
+        .enterprise-info-card {
+            position: relative;
+            margin-bottom: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
+        .enterprise-info-card .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #333;
+        }
+        .enterprise-info-card.expanded .card-header {
+            border-radius: 8px 8px 0 0;
+        }
+        .card-header-content {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+        }
+        .toggle-icon {
+            font-size: 16px;
+            color: #999;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            margin-left: 10px;
+        }
+        .toggle-icon.rotate {
+            transform: rotate(-180deg);
+            color: #653eb3;
+        }
+        .collapsible-content {
+            overflow: hidden;
+            transition: max-height 0.5s ease;
+            max-height: 0; /* 初始状态设为0 */
+            opacity: 0;
+            transition: max-height 0.5s ease, opacity 0.3s ease;
+        }
+        .collapsible-content.expanded {
+            opacity: 1;
+        }
+        .enterprise-info {
+            display: flex;
+            flex-direction: column;
+            padding: 16px;
+            gap: 8px;
+        }
+        .enterprise-name {
+            font-size: 18px;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+        .enterprise-code {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+        .enterprise-detail {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-top: 0;
+            margin-bottom: 4px;
+        }
+        .enterprise-legal-container, .enterprise-address-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .enterprise-icon {
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+        }
+        .enterprise-legal {
+            font-size: 15px;
+            color: #333;
+            font-weight: 500;
+        }
+        .enterprise-phone {
+            font-size: 14px;
+            color: #666;
+        }
+        .enterprise-address {
+            font-size: 13px;
+            color: #999;
+            line-height: 1.4;
+        }
+        .card-subtitle {
+            font-size: 12px;
+            color: #653eb3;
+            margin-left: 10px;
+            font-weight: normal;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        .card-subtitle i {
+            font-size: 10px;
+            margin-left: 4px;
+        }
+        .edit-icon {
+            cursor: pointer;
+            width: 18px;
+            height: 18px;
+            transition: opacity 0.2s;
+        }
+        .edit-icon:active {
+            opacity: 0.7;
+        }
+        .info-item {
+            padding: 14px 16px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .info-item:last-child {
+            border-bottom: none;
+        }
+        .info-label {
+            font-size: 13px;
+            color: #999;
+            margin-bottom: 4px;
+        }
+        .info-value {
+            font-size: 15px;
+            color: #333;
+            font-weight: 500;
+        }
+        .branch-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            flex-shrink: 0;
+            width: 240px;
+        }
+        .branch-code {
+            font-size: 13px;
+            color: #653eb3;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+        .branch-name {
+            font-size: 15px;
+            color: #333;
+            font-weight: 600;
+        }
+        .account-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 16px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .account-item:last-child {
+            border-bottom: none;
+        }
+        .account-info {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .account-icon {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+        .account-details {
+            flex: 1;
+        }
+        .account-number {
+            font-size: 15px;
+            color: #333;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+        .account-bank {
+            font-size: 13px;
+            color: #999;
+        }
+        .branches-container {
+            display: flex;
+            overflow-x: auto;
+            gap: 12px;
+            padding: 16px;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none; /* Firefox */
+        }
+        .branches-container::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Edge */
+        }
+        .handler-info {
+            display: flex;
+            flex-direction: column;
+            padding: 16px;
+            gap: 10px;
+        }
+        .handler-main-info {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .handler-left {
+            display: flex;
+            align-items: center;
+        }
+        .handler-name {
+            font-size: 16px;
+            color: #333;
+            font-weight: 500;
+            margin-right: 12px;
+        }
+        .handler-phone {
+            font-size: 15px;
+            color: #333;
+        }
+        .handler-id-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .id-icon {
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+        }
+        .handler-id-value {
+            font-size: 13px;
+            color: #999;
+        }
+        .add-btn {
+            font-size: 13px;
+            color: #653eb3;
+            cursor: pointer;
+        }
+        /* 页面加载动画 */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #6c3cbf;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="pb-24">
+    <!-- 状态栏 -->
+    <div class="status-bar">
+        <div>9:41</div>
+        <div class="flex items-center space-x-2">
+            <i class="fas fa-signal"></i>
+            <i class="fas fa-wifi"></i>
+            <i class="fas fa-battery-full"></i>
+        </div>
+    </div>
+
+    <!-- 标题栏 -->
+    <div class="header">
+        <a href="enterprise-list.html" class="back-btn">
+            <i class="fas fa-chevron-left"></i>
+        </a>
+        <div class="header-container">
+            <div class="header-title">我的企业</div>
+        </div>
+    </div>
+
+    <!-- 添加加载动画 -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <!-- 企业信息卡片 -->
+    <div class="enterprise-info-card" id="enterprise-card">
+        <div class="card-header">
+            <div class="card-header-content">
+                <div style="font-size: 15px; font-weight: 600;">企业信息</div>
+                <i class="fas fa-chevron-down toggle-icon" id="toggleIcon"></i>
+            </div>
+            <img src="images/编辑.svg" alt="编辑" class="edit-icon">
+        </div>
+        <div class="collapsible-content" id="collapsible-content">
+            <div class="enterprise-info">
+                <div class="enterprise-name">宁夏银川市金凤区丰阅网点</div>
+                <div class="enterprise-code">91640106MA774XRP2B</div>
+                <div class="enterprise-detail">
+                    <div class="enterprise-legal-container">
+                        <img src="images/法人.svg" alt="法人" class="enterprise-icon">
+                        <div class="enterprise-legal">张丰阅</div>
+                    </div>
+                    <div class="enterprise-phone">138****8888</div>
+                </div>
+                <div class="enterprise-address-container">
+                    <img src="images/位置.svg" alt="位置" class="enterprise-icon">
+                    <div class="enterprise-address">宁夏回族自治区银川市金凤区正源北街丰登社区5号楼1层112号营业房</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 网点信息卡片 -->
+    <div class="info-card">
+        <div class="card-header">
+            网点信息
+        </div>
+        <div class="branches-container">
+            <div class="branch-card">
+                <div class="info-item">
+                    <div class="branch-code">951031</div>
+                    <div class="branch-name">宁夏银川市金凤区丰阅网点</div>
+                </div>
+            </div>
+            <div class="branch-card">
+                <div class="info-item">
+                    <div class="branch-code">951032</div>
+                    <div class="branch-name">宁夏银川市西夏区常盛网点</div>
+                </div>
+            </div>
+            <div class="branch-card">
+                <div class="info-item">
+                    <div class="branch-code">951033</div>
+                    <div class="branch-name">宁夏银川市兴庆区万达网点</div>
+                </div>
+            </div>
+            <div class="branch-card">
+                <div class="info-item">
+                    <div class="branch-code">951034</div>
+                    <div class="branch-name">宁夏银川市金凤区双河网点</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 对公账户卡片 -->
+    <div class="info-card">
+        <div class="card-header">
+            对公账户
+            <div class="add-btn">+ 增加</div>
+        </div>
+        <div class="account-item">
+            <div class="account-info">
+                <img src="images/对公账户.svg" alt="对公账户图标" class="account-icon">
+                <div class="account-details">
+                    <div class="account-number">622848******4567</div>
+                    <div class="account-bank">中国银行</div>
+                </div>
+            </div>
+            <img src="images/编辑.svg" alt="编辑" class="edit-icon">
+        </div>
+        <div class="account-item">
+            <div class="account-info">
+                <img src="images/对公账户.svg" alt="对公账户图标" class="account-icon">
+                <div class="account-details">
+                    <div class="account-number">621058******8910</div>
+                    <div class="account-bank">宁夏银行</div>
+                </div>
+            </div>
+            <img src="images/编辑.svg" alt="编辑" class="edit-icon">
+        </div>
+    </div>
+
+    <!-- 企业经办人卡片 -->
+    <div class="info-card">
+        <div class="card-header">
+            <div class="card-header-content">
+                <div style="font-size: 15px; font-weight: 600;">企业经办人</div>
+                <div class="card-subtitle" id="handler-subtitle">
+                    查看经办人申请借款流程
+                </div>
+            </div>
+        </div>
+        <div class="handler-info">
+            <div class="handler-main-info">
+                <div class="handler-left">
+                    <div class="handler-name">王小明</div>
+                    <div class="handler-phone">159****7766</div>
+                </div>
+                <img src="images/编辑.svg" alt="编辑" class="edit-icon">
+            </div>
+            <div class="handler-id-container">
+                <img src="images/身份证号.svg" alt="身份证号" class="id-icon">
+                <div class="handler-id-value">640***********5214</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 隐藏加载动画
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            if (loadingOverlay) {
+                setTimeout(() => {
+                    loadingOverlay.style.opacity = '0';
+                    setTimeout(() => {
+                        loadingOverlay.style.display = 'none';
+                    }, 300);
+                }, 500);
+            }
+        
+            const toggleIcon = document.querySelector('.toggle-icon');
+            const collapsibleContent = document.getElementById('collapsible-content');
+            const enterpriseCard = document.getElementById('enterprise-card');
+            let isCollapsed = true; // 默认为折叠状态
+            
+            // 默认保持折叠状态
+            collapsibleContent.style.maxHeight = '0';
+            toggleIcon.classList.add('rotate');
+            
+            toggleIcon.addEventListener('click', function() {
+                if (isCollapsed) {
+                    // 展开内容
+                    collapsibleContent.style.maxHeight = '1000px';
+                    toggleIcon.classList.remove('rotate');
+                    collapsibleContent.classList.add('expanded');
+                    enterpriseCard.classList.add('expanded');
+                } else {
+                    // 折叠内容
+                    collapsibleContent.style.maxHeight = '0';
+                    toggleIcon.classList.add('rotate');
+                    collapsibleContent.classList.remove('expanded');
+                    enterpriseCard.classList.remove('expanded');
+                }
+                isCollapsed = !isCollapsed;
+            });
+            
+            // 为编辑图标添加点击事件
+            document.querySelectorAll('.edit-icon').forEach(icon => {
+                icon.addEventListener('click', function(e) {
+                    // 阻止事件冒泡，防止触发折叠/展开
+                    e.stopPropagation();
+                    
+                    // 点击效果
+                    this.style.opacity = 0.5;
+                    setTimeout(() => {
+                        this.style.opacity = 1;
+                        // 这里可以添加跳转逻辑，暂时只显示提示
+                        alert('跳转至编辑页面');
+                    }, 200);
+                });
+            });
+
+            // 为增加按钮添加点击事件
+            document.querySelector('.add-btn').addEventListener('click', function() {
+                // 点击效果
+                this.style.opacity = 0.5;
+                setTimeout(() => {
+                    this.style.opacity = 1;
+                    // 这里可以添加跳转逻辑，暂时只显示提示
+                    alert('跳转至添加账户页面');
+                }, 200);
+            });
+            
+            // 为副标题添加点击事件
+            document.querySelector('#handler-subtitle').addEventListener('click', function() {
+                // 添加点击效果
+                this.style.opacity = 0.5;
+                setTimeout(() => {
+                    this.style.opacity = 1;
+                    // 这里可以添加跳转逻辑，暂时只显示提示
+                    alert('查看经办人申请借款流程');
+                }, 200);
+            });
+        });
+    </script>
+</body>
+</html> 
